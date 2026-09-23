@@ -1,5 +1,6 @@
 import Navbar from "./components/Navbar";
 import ServiceCard from "./components/ServiceCard";
+import Chatbot from "./components/Chatbot";
 
 function App() {
   const services = [
@@ -52,6 +53,7 @@ function App() {
             ))}
           </div>
         </section>
+        <Chatbot />
       </main>
     </div>
   );
