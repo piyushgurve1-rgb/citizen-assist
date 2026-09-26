@@ -492,6 +492,35 @@ You can ask about this service's documents, steps or eligibility.`;
     setShowLanguages(false);
   };
 
+const documentServices = Object.values(servicesData);
+
+const handleDocumentServiceSelect = (service) => {
+  const userText = service.name;
+
+  setMessages((current) => [
+    ...current,
+    {
+      sender: "user",
+      text: userText,
+      time: "Now",
+    },
+  ]);
+
+  setTimeout(() => {
+    const reply = generateReply(
+      `${service.name} required documents`
+    );
+
+    setMessages((current) => [
+      ...current,
+      {
+        sender: "ai",
+        text: reply,
+        time: "Now",
+      },
+    ]);
+  }, 400);
+};
   const quickActions = selectedService
     ? [
         {
@@ -605,6 +634,23 @@ You can ask about this service's documents, steps or eligibility.`;
             ))}
 
           </div>
+          {isOpen &&
+  initialAction === "documents" &&
+  !selectedService && (
+    <div className="document-service-options">
+      {documentServices.map((service) => (
+        <button
+          type="button"
+          key={service.name}
+          onClick={() =>
+            handleDocumentServiceSelect(service)
+          }
+        >
+          {service.name}
+        </button>
+      ))}
+    </div>
+  )}
 
           <div className="quick-actions">
 
