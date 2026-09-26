@@ -22,9 +22,6 @@ function ChatWidget({
       time: "Now",
     },
   ]);
-  const serviceContextMessage = selectedService
-  ? `I can help you with ${selectedService.name}. You can ask about eligibility, required documents, application steps or other details.`
-  : null;
 
   const languages = [
     { code: "en-IN", name: "English" },
@@ -63,126 +60,174 @@ function ChatWidget({
   };
 
   const generateReply = (userMessage) => {
-  const detectedService = findService(userMessage);
-  const service = selectedService || detectedService;
+    const detectedService = findService(userMessage);
+    const service = selectedService || detectedService;
 
-  const text = userMessage.toLowerCase();
+    const text = userMessage.toLowerCase();
 
-  const isHindi =
-    selectedLanguage === "hi-IN";
+    const isHindi =
+      selectedLanguage === "hi-IN";
 
-  const isMarathi =
-    selectedLanguage === "mr-IN";
+    const isMarathi =
+      selectedLanguage === "mr-IN";
 
-  if (!service) {
-    if (isHindi) {
-      return "मैं PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate और Scholarships जैसी सरकारी सेवाओं में मदद कर सकता हूँ। कृपया जिस सेवा की जानकारी चाहिए उसका नाम बताएं।";
+    if (!service) {
+      if (isHindi) {
+        return "मैं PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate और Scholarship जैसी सरकारी सेवाओं में मदद कर सकता हूँ। कृपया सेवा का नाम बताएं।";
+      }
+
+      if (isMarathi) {
+        return "मी PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate आणि Scholarship यांसारख्या सरकारी सेवांमध्ये मदत करू शकतो. कृपया सेवेचे नाव सांगा.";
+      }
+
+      return "I can help with government services such as PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate and Scholarship. Please mention the service name.";
     }
 
-    if (isMarathi) {
-      return "मी PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate आणि Scholarships यांसारख्या सरकारी सेवांमध्ये मदत करू शकतो. कृपया तुम्हाला कोणत्या सेवेची माहिती हवी आहे ते सांगा.";
-    }
+    const asksDocuments =
+      text.includes("document") ||
+      text.includes("documents") ||
+      text.includes("proof") ||
+      text.includes("kagaz") ||
+      text.includes("kagaj") ||
+      text.includes("documents chahiye") ||
+      text.includes("कागज") ||
+      text.includes("कागज़") ||
+      text.includes("दस्तावेज") ||
+      text.includes("दस्तावेज़") ||
+      text.includes("कागदपत्र") ||
+      text.includes("कागद");
 
-    return "I can help with government services such as PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate and Scholarships. Please mention the service you need.";
-  }
+    const asksSteps =
+      text.includes("step") ||
+      text.includes("steps") ||
+      text.includes("process") ||
+      text.includes("apply") ||
+      text.includes("application") ||
+      text.includes("how") ||
+      text.includes("kaise") ||
+      text.includes("kaise apply") ||
+      text.includes("कैसे") ||
+      text.includes("कैसे करें") ||
+      text.includes("प्रक्रिया") ||
+      text.includes("आवेदन") ||
+      text.includes("अर्ज") ||
+      text.includes("कसा") ||
+      text.includes("कसे");
 
-  const asksDocuments =
-    text.includes("document") ||
-    text.includes("documents") ||
-    text.includes("proof") ||
-    text.includes("kagaz") ||
-    text.includes("कागज") ||
-    text.includes("कागज़") ||
-    text.includes("कागदपत्र");
+    const asksEligibility =
+      text.includes("eligible") ||
+      text.includes("eligibility") ||
+      text.includes("who can") ||
+      text.includes("patra") ||
+      text.includes("patrata") ||
+      text.includes("पात्र") ||
+      text.includes("पात्रता") ||
+      text.includes("पात्र है") ||
+      text.includes("कोण पात्र") ||
+      text.includes("पात्र कोण");
 
-  const asksSteps =
-    text.includes("step") ||
-    text.includes("steps") ||
-    text.includes("process") ||
-    text.includes("apply") ||
-    text.includes("application") ||
-    text.includes("kaise") ||
-    text.includes("कैसे") ||
-    text.includes("प्रक्रिया") ||
-    text.includes("अर्ज");
-
-  const asksEligibility =
-    text.includes("eligible") ||
-    text.includes("eligibility") ||
-    text.includes("patra") ||
-    text.includes("पात्र") ||
-    text.includes("पात्रता") ||
-    text.includes("पात्र आहे");
-
-  if (asksDocuments) {
-    if (isHindi) {
-      return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
+    if (asksDocuments) {
+      if (isHindi) {
+        return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
 
 ${service.documents
   .map(
     (document, index) =>
       `${index + 1}. ${document}`
   )
-  .join("\n")}`;
-    }
+  .join("\n")}
 
-    if (isMarathi) {
-      return `${service.name} साठी सामान्यतः आवश्यक कागदपत्रे:
+अगर आपको किसी दस्तावेज़ के बारे में अधिक जानकारी चाहिए, तो उसका नाम पूछ सकते हैं।`;
+      }
 
-${service.documents
-  .map(
-    (document, index) =>
-      `${index + 1}. ${document}`
-  )
-  .join("\n")}`;
-    }
-
-    return `${service.name} commonly required documents:
+      if (isMarathi) {
+        return `${service.name} साठी सामान्यतः आवश्यक कागदपत्रे:
 
 ${service.documents
   .map(
     (document, index) =>
       `${index + 1}. ${document}`
   )
-  .join("\n")}`;
-  }
+  .join("\n")}
 
-  if (asksSteps) {
-    if (isHindi) {
-      return `${service.name} के आवेदन की सामान्य प्रक्रिया:
+तुम्हाला कोणत्याही कागदपत्राबद्दल अधिक माहिती हवी असल्यास त्याचे नाव विचारा.`;
+      }
 
-${service.steps
+      return `${service.name} commonly required documents:
+
+${service.documents
   .map(
-    (step, index) =>
-      `${index + 1}. ${step}`
+    (document, index) =>
+      `${index + 1}. ${document}`
   )
-  .join("\n")}`;
+  .join("\n")}
+
+You can ask about any specific document for more information.`;
     }
 
-    if (isMarathi) {
-      return `${service.name} साठी अर्ज करण्याची सामान्य प्रक्रिया:
+    if (asksSteps) {
+      if (isHindi) {
+        return `${service.name} के लिए आवेदन की सामान्य प्रक्रिया:
 
 ${service.steps
   .map(
     (step, index) =>
       `${index + 1}. ${step}`
   )
-  .join("\n")}`;
+  .join("\n")}
+
+अगर आपको किसी step को समझना है, तो उसके बारे में पूछ सकते हैं।`;
+      }
+
+      if (isMarathi) {
+        return `${service.name} साठी अर्ज करण्याची सामान्य प्रक्रिया:
+
+${service.steps
+  .map(
+    (step, index) =>
+      `${index + 1}. ${step}`
+  )
+  .join("\n")}
+
+तुम्हाला कोणताही step समजून घ्यायचा असल्यास त्याबद्दल विचारा.`;
+      }
+
+      return `${service.name} basic application steps:
+
+${service.steps
+  .map(
+    (step, index) =>
+      `${index + 1}. ${step}`
+  )
+  .join("\n")}
+
+You can ask about any specific step for more information.`;
     }
 
-    return `${service.name} basic application steps:
+    if (asksEligibility) {
+      if (isHindi) {
+        return `${service.name} की पात्रता:
 
-${service.steps
+${service.eligibility
   .map(
-    (step, index) =>
-      `${index + 1}. ${step}`
+    (item, index) =>
+      `${index + 1}. ${item}`
   )
   .join("\n")}`;
-  }
+      }
 
-  if (asksEligibility) {
-    if (isHindi) {
-      return `${service.name} की पात्रता:
+      if (isMarathi) {
+        return `${service.name} साठी पात्रता:
+
+${service.eligibility
+  .map(
+    (item, index) =>
+      `${index + 1}. ${item}`
+  )
+  .join("\n")}`;
+      }
+
+      return `${service.name} eligibility:
 
 ${service.eligibility
   .map(
@@ -192,86 +237,68 @@ ${service.eligibility
   .join("\n")}`;
     }
 
-    if (isMarathi) {
-      return `${service.name} साठी पात्रता:
+    if (isHindi) {
+      return `${service.name}
 
-${service.eligibility
-  .map(
-    (item, index) =>
-      `${index + 1}. ${item}`
-  )
-  .join("\n")}`;
+${
+  service.overview || service.description
+}
+
+आप इस सेवा के documents, steps या eligibility के बारे में पूछ सकते हैं।`;
     }
 
-    return `${service.name} eligibility:
+    if (isMarathi) {
+      return `${service.name}
 
-${service.eligibility
-  .map(
-    (item, index) =>
-      `${index + 1}. ${item}`
-  )
-  .join("\n")}`;
-  }
+${
+  service.overview || service.description
+}
 
-  if (isHindi) {
+तुम्ही या सेवेची कागदपत्रे, प्रक्रिया किंवा पात्रता विचारू शकता.`;
+    }
+
     return `${service.name}
 
 ${
   service.overview || service.description
 }
 
-आप "${service.name}" के documents, steps या eligibility के बारे में पूछ सकते हैं।`;
-  }
-
-  if (isMarathi) {
-    return `${service.name}
-
-${
-  service.overview || service.description
-}
-
-तुम्ही "${service.name}" ची कागदपत्रे, प्रक्रिया किंवा पात्रता विचारू शकता.`;
-  }
-
-  return `${service.name}
-
-${
-  service.overview || service.description
-}
-
-You can ask about "${service.name}" documents, steps or eligibility.`;
-};
-  const addServiceContext = () => {
-  if (!selectedService) {
-    return;
-  }
-
-  const contextMessage = {
-    sender: "ai",
-    text: `You are viewing ${selectedService.name}. I can help you with its eligibility, required documents, application steps and other information.`,
-    time: "Now",
+You can ask about this service's documents, steps or eligibility.`;
   };
 
-  setMessages((current) => {
-    const alreadyShown = current.some(
-      (msg) => msg.text === contextMessage.text
-    );
-
-    if (alreadyShown) {
-      return current;
+  const addServiceContext = () => {
+    if (!selectedService) {
+      return;
     }
 
-    return [...current, contextMessage];
-  });
-};
-useEffect(() => {
-  if (isOpen && selectedService) {
-    addServiceContext();
-  }
-}, [isOpen, selectedService]);
+    const contextMessage = {
+      sender: "ai",
+      text: `You are viewing ${selectedService.name}. I can help you with its eligibility, required documents, application steps and other information.`,
+      time: "Now",
+    };
 
-const handleSend = () => {
-  addServiceContext();
+    setMessages((current) => {
+      const alreadyShown = current.some(
+        (msg) => msg.text === contextMessage.text
+      );
+
+      if (alreadyShown) {
+        return current;
+      }
+
+      return [...current, contextMessage];
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen && selectedService) {
+      addServiceContext();
+    }
+  }, [isOpen, selectedService]);
+
+  const handleSend = () => {
+    addServiceContext();
+
     const userMessage = message.trim();
 
     if (!userMessage) {
@@ -414,6 +441,7 @@ const handleSend = () => {
 
                 <span className="chat-status">
                   <span className="status-dot"></span>
+
                   {isListening
                     ? "Listening..."
                     : "Online"}
