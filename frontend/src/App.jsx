@@ -1,61 +1,38 @@
+import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Navbar from "./components/Navbar";
-import ServiceCard from "./components/ServiceCard";
-import Chatbot from "./components/Chatbot";
+import Home from "./pages/Home";
+import Services from "./pages/Services";
+import ServiceDetails from "./pages/ServiceDetails";
+import ChatWidget from "./components/ChatWidget";
 
 function App() {
-  const services = [
-    {
-      name: "PM-KISAN",
-      description:
-        "Information about PM-KISAN scheme and application guidance.",
-      icon: "🌾",
-    },
-    {
-      name: "Ayushman Bharat",
-      description:
-        "Get guidance about health scheme eligibility and documents.",
-      icon: "🏥",
-    },
-    {
-      name: "Income Certificate",
-      description:
-        "Understand documents and steps required for an income certificate.",
-      icon: "📄",
-    },
-    {
-      name: "Passport",
-      description:
-        "Get simple guidance for passport application and documents.",
-      icon: "🛂",
-    },
-  ];
-
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("en-IN");
   return (
-    <div>
-      <Navbar />
+    <BrowserRouter>
+      <Navbar
+  onOpenChat={() => setIsChatOpen(true)}
+/>
 
       <main>
-        <h1>Government Services, Simplified.</h1>
-
-        <p>
-          Get simple guidance for government services,
-          documents, forms and applications.
-        </p>
-
-        <button>Ask CitizenAssist</button>
-
-        <section className="services-section">
-          <h2>Popular Services</h2>
-
-          <div className="service-grid">
-            {services.map((service) => (
-              <ServiceCard key={service.name} service={service} />
-            ))}
-          </div>
-        </section>
-        <Chatbot />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
+          <Route
+            path="/services/:serviceName"
+            element={<ServiceDetails />}
+          />
+        </Routes>
       </main>
-    </div>
+      <ChatWidget
+  isOpen={isChatOpen}
+  setIsOpen={setIsChatOpen}
+  selectedLanguage={selectedLanguage}
+  setSelectedLanguage={setSelectedLanguage}
+/>
+    </BrowserRouter>
   );
 }
 
