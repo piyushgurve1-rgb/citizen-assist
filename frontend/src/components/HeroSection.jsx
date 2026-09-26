@@ -1,4 +1,9 @@
-function HeroSection() {
+import { useNavigate } from "react-router-dom";
+
+function HeroSection({ onOpenChat }) {
+  console.log("HeroSection onOpenChat:", onOpenChat);
+  const navigate = useNavigate();
+
   const user = {
     name: "Ajay",
   };
@@ -8,18 +13,37 @@ function HeroSection() {
       icon: "🔎",
       title: "Find a Service",
       description: "Search for government services",
+      action: "services",
     },
     {
       icon: "📄",
       title: "Document Guidance",
       description: "Know which documents you need",
+      action: "documents",
     },
     {
       icon: "💬",
       title: "Ask AI Assistant",
       description: "Get simple step-by-step help",
+      action: "chat",
     },
   ];
+
+  const handleQuickAction = (action) => {
+    if (action === "services") {
+      navigate("/services");
+      return;
+    }
+
+    if (action === "documents") {
+      onOpenChat();
+      return;
+    }
+
+    if (action === "chat") {
+      onOpenChat();
+    }
+  };
 
   return (
     <section className="dashboard-hero">
@@ -80,6 +104,7 @@ function HeroSection() {
           <button
             type="button"
             className="assistant-button"
+            onClick={onOpenChat}
           >
             Start Chat →
           </button>
@@ -95,6 +120,9 @@ function HeroSection() {
               type="button"
               className="quick-action-card"
               key={action.title}
+              onClick={() =>
+                handleQuickAction(action.action)
+              }
             >
               <span className="quick-action-icon">
                 {action.icon}
