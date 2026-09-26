@@ -41,6 +41,12 @@ function ServiceDetails() {
     );
   }
 
+  const handleAskAssistant = () => {
+    console.log(
+      `Ask AI Assistant about ${service.name}`
+    );
+  };
+
   return (
     <section className="service-details-page">
 
@@ -135,6 +141,35 @@ function ServiceDetails() {
           </ol>
 
         </div>
+
+      </div>
+
+
+      {/* AI Assistant */}
+      <div className="service-assistant-card">
+
+        <div>
+          <p className="official-label">
+            NEED HELP?
+          </p>
+
+          <h2>
+            Ask AI Assistant about this service
+          </h2>
+
+          <p>
+            Get simple guidance about eligibility,
+            documents, steps and form-related questions.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="assistant-button"
+          onClick={handleAskAssistant}
+        >
+          Ask AI Assistant →
+        </button>
 
       </div>
 
