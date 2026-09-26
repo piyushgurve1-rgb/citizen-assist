@@ -2053,3 +2053,280 @@ main {
     padding: 15px;
   }
 }
+/* =========================================
+   GOVERNMENT SERVICE CARDS
+   ========================================= */
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+}
+
+
+/* Card */
+
+.service-card {
+  min-width: 0;
+  min-height: 280px;
+
+  padding: 22px;
+
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  border: 1px solid #26364b;
+  border-radius: 17px;
+
+  background: #151d28;
+  color: #f4f7fb;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+
+  border-color: #315f9f;
+
+  background: #182231;
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Top */
+
+.service-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.service-icon {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #202d40;
+
+  font-size: 21px;
+}
+
+.service-category {
+  padding: 6px 10px;
+
+  border: 1px solid #2a405e;
+  border-radius: 20px;
+
+  background: #182536;
+  color: #79a9e8;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+
+/* Content */
+
+.service-card-content {
+  flex: 1;
+
+  margin-top: 24px;
+}
+
+.service-card-content h3 {
+  margin: 0;
+
+  color: #f2f6fb;
+
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 650;
+}
+
+.service-card-content p {
+  margin: 10px 0 0;
+
+  color: #8fa4be;
+
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+
+/* Footer */
+
+.service-card-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  border-top: 1px solid #243247;
+}
+
+.service-card-footer > span {
+  color: #70859f;
+
+  font-size: 12px;
+}
+
+.service-card-footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px 13px;
+
+  border: 1px solid #2e6fd8;
+  border-radius: 9px;
+
+  background: #225fca;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.service-card-footer button:hover {
+  background: #2f73e0;
+  transform: translateY(-1px);
+}
+
+
+/* =========================================
+   SERVICE GRID RESPONSIVE
+   ========================================= */
+
+@media (max-width: 1000px) {
+  .service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .service-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card {
+    min-height: 250px;
+  }
+
+  .service-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .service-card-footer button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* =========================================
+   POPULAR SERVICES SECTION
+   ========================================= */
+
+.services-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  padding: 0 42px 70px;
+
+  box-sizing: border-box;
+}
+
+.section-heading {
+  margin-bottom: 24px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #f1f5fa;
+
+  font-size: 25px;
+  line-height: 1.3;
+  font-weight: 650;
+}
+
+.services-subtitle {
+  margin: 7px 0 0;
+
+  color: #8499b3;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.view-all-link {
+  flex-shrink: 0;
+
+  color: #6fa4f5;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.view-all-link:hover {
+  color: #91bbff;
+}
+
+
+/* Responsive */
+
+@media (max-width: 700px) {
+  .services-section {
+    padding: 0 18px 50px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .section-heading h2 {
+    font-size: 22px;
+  }
+}

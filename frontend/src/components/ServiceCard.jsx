@@ -9,23 +9,38 @@ function ServiceCard({ service }) {
 
   return (
     <article className="service-card">
+      {/* Card Header */}
       <div className="service-card-top">
-        <span className="service-icon">{service.icon}</span>
+        <div className="service-icon">
+          {service.icon}
+        </div>
 
         <span className="service-category">
           {service.category}
         </span>
       </div>
 
-      <h3>{service.name}</h3>
+      {/* Service Information */}
+      <div className="service-card-content">
+        <h3>{service.name}</h3>
 
-      <p>{service.description}</p>
+        <p>
+          {service.description}
+        </p>
+      </div>
 
+      {/* Card Footer */}
       <div className="service-card-footer">
-        <span>Step-by-step guidance</span>
+        <span>
+          Step-by-step guidance
+        </span>
 
-        <button type="button" onClick={handleViewService}>
-          View Service →
+        <button
+          type="button"
+          onClick={handleViewService}
+        >
+          View Service
+          <span aria-hidden="true">→</span>
         </button>
       </div>
     </article>
