@@ -296,35 +296,36 @@ You can ask about this service's documents, steps or eligibility.`;
       addServiceContext();
     }
   }, [isOpen, selectedService]);
+
   useEffect(() => {
-  if (
-    isOpen &&
-    initialAction === "documents" &&
-    !selectedService
-  ) {
-    setMessages((current) => {
-      const alreadyShown = current.some(
-        (msg) =>
-          msg.text ===
-          "Sure! I can help you find the documents required for a government service. Please tell me the service name."
-      );
+    if (
+      isOpen &&
+      initialAction === "documents" &&
+      !selectedService
+    ) {
+      setMessages((current) => {
+        const alreadyShown = current.some(
+          (msg) =>
+            msg.text ===
+            "Sure! I can help you find the documents required for a government service. Please tell me the service name."
+        );
 
-      if (alreadyShown) {
-        return current;
-      }
+        if (alreadyShown) {
+          return current;
+        }
 
-      return [
-        ...current,
-        {
-          sender: "ai",
-          text:
-            "Sure! I can help you find the documents required for a government service. Please tell me the service name.",
-          time: "Now",
-        },
-      ];
-    });
-  }
-}, [isOpen, initialAction, selectedService]);
+        return [
+          ...current,
+          {
+            sender: "ai",
+            text:
+              "Sure! I can help you find the documents required for a government service. Please tell me the service name.",
+            time: "Now",
+          },
+        ];
+      });
+    }
+  }, [isOpen, initialAction, selectedService]);
 
   const handleSend = () => {
     addServiceContext();
@@ -389,8 +390,10 @@ You can ask about this service's documents, steps or eligibility.`;
     }
 
     if (action === "official") {
-      if (selectedService?.officialUrl &&
-          selectedService.officialUrl !== "#") {
+      if (
+        selectedService?.officialUrl &&
+        selectedService.officialUrl !== "#"
+      ) {
         window.open(
           selectedService.officialUrl,
           "_blank",
@@ -460,13 +463,35 @@ You can ask about this service's documents, steps or eligibility.`;
 
     recognition.onresult = (event) => {
       const transcript =
-        event.results[0][0].transcript;
+        event.results[0][0].transcript.trim();
 
-      setMessage((current) =>
-        current
-          ? `${current} ${transcript}`
-          : transcript
-      );
+      if (!transcript) {
+        return;
+      }
+
+      setMessage(transcript);
+
+      setMessages((current) => [
+        ...current,
+        {
+          sender: "user",
+          text: transcript,
+          time: "Now",
+        },
+      ]);
+
+      setTimeout(() => {
+        const reply = generateReply(transcript);
+
+        setMessages((current) => [
+          ...current,
+          {
+            sender: "ai",
+            text: reply,
+            time: "Now",
+          },
+        ]);
+      }, 400);
     };
 
     recognition.onerror = (event) => {
@@ -480,6 +505,7 @@ You can ask about this service's documents, steps or eligibility.`;
 
     recognition.onend = () => {
       setIsListening(false);
+      recognitionRef.current = null;
     };
 
     recognitionRef.current = recognition;
@@ -492,35 +518,36 @@ You can ask about this service's documents, steps or eligibility.`;
     setShowLanguages(false);
   };
 
-const documentServices = Object.values(servicesData);
+  const documentServices = Object.values(servicesData);
 
-const handleDocumentServiceSelect = (service) => {
-  const userText = service.name;
-
-  setMessages((current) => [
-    ...current,
-    {
-      sender: "user",
-      text: userText,
-      time: "Now",
-    },
-  ]);
-
-  setTimeout(() => {
-    const reply = generateReply(
-      `${service.name} required documents`
-    );
+  const handleDocumentServiceSelect = (service) => {
+    const userText = service.name;
 
     setMessages((current) => [
       ...current,
       {
-        sender: "ai",
-        text: reply,
+        sender: "user",
+        text: userText,
         time: "Now",
       },
     ]);
-  }, 400);
-};
+
+    setTimeout(() => {
+      const reply = generateReply(
+        `${service.name} required documents`
+      );
+
+      setMessages((current) => [
+        ...current,
+        {
+          sender: "ai",
+          text: reply,
+          time: "Now",
+        },
+      ]);
+    }, 400);
+  };
+
   const quickActions = selectedService
     ? [
         {
@@ -634,23 +661,24 @@ const handleDocumentServiceSelect = (service) => {
             ))}
 
           </div>
+
           {isOpen &&
-  initialAction === "documents" &&
-  !selectedService && (
-    <div className="document-service-options">
-      {documentServices.map((service) => (
-        <button
-          type="button"
-          key={service.name}
-          onClick={() =>
-            handleDocumentServiceSelect(service)
-          }
-        >
-          {service.name}
-        </button>
-      ))}
-    </div>
-  )}
+            initialAction === "documents" &&
+            !selectedService && (
+              <div className="document-service-options">
+                {documentServices.map((service) => (
+                  <button
+                    type="button"
+                    key={service.name}
+                    onClick={() =>
+                      handleDocumentServiceSelect(service)
+                    }
+                  >
+                    {service.name}
+                  </button>
+                ))}
+              </div>
+            )}
 
           <div className="quick-actions">
 
