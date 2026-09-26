@@ -2330,3 +2330,593 @@ main {
     font-size: 22px;
   }
 }
+/* =========================================
+   SERVICES PAGE
+   ========================================= */
+
+.services-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  padding: 58px 42px 80px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   PAGE HEADER
+   ========================================= */
+
+.services-page-header {
+  max-width: 760px;
+}
+
+.services-page-header .hero-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 7px 12px;
+
+  border: 1px solid #2b4261;
+  border-radius: 20px;
+
+  background: #182638;
+  color: #82b2f4;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.services-page-header h1 {
+  margin: 20px 0 10px;
+
+  color: #f2f6fb;
+
+  font-size: 40px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.services-page-header > p {
+  max-width: 680px;
+  margin: 0;
+
+  color: #91a6c0;
+
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+
+/* =========================================
+   SEARCH
+   ========================================= */
+
+.services-search {
+  width: 100%;
+  max-width: 650px;
+
+  margin-top: 28px;
+  padding: 0 16px;
+
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  border: 1px solid #2a3b52;
+  border-radius: 12px;
+
+  background: #151d28;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.services-search:focus-within {
+  border-color: #3975d4;
+
+  box-shadow:
+    0 0 0 3px rgba(57, 117, 212, 0.1);
+}
+
+.services-search span {
+  flex-shrink: 0;
+  font-size: 17px;
+}
+
+.services-search input {
+  width: 100%;
+  height: 50px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+  color: #edf3fa;
+
+  font-size: 14px;
+}
+
+.services-search input::placeholder {
+  color: #657991;
+}
+
+
+/* =========================================
+   CATEGORY FILTERS
+   ========================================= */
+
+.category-filters {
+  margin: 42px 0 26px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+}
+
+.category-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.category-button {
+  flex-shrink: 0;
+
+  padding: 9px 16px;
+
+  border: 1px solid #293a51;
+  border-radius: 20px;
+
+  background: #151d28;
+  color: #8da2bb;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.category-button:hover {
+  border-color: #355b8c;
+  color: #c3d6ec;
+}
+
+.category-button.active {
+  border-color: #3573d8;
+  background: #225fca;
+  color: #ffffff;
+}
+
+
+/* =========================================
+   EMPTY RESULTS
+   ========================================= */
+
+.no-results {
+  min-height: 220px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #26364b;
+  border-radius: 16px;
+
+  background: #151d28;
+
+  text-align: center;
+}
+
+.no-results > span {
+  font-size: 28px;
+}
+
+.no-results h3 {
+  margin: 12px 0 5px;
+
+  color: #eaf1f8;
+
+  font-size: 18px;
+}
+
+.no-results p {
+  margin: 0;
+
+  color: #8195ad;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 700px) {
+  .services-page {
+    padding: 40px 18px 60px;
+  }
+
+  .services-page-header h1 {
+    font-size: 32px;
+  }
+
+  .services-page-header > p {
+    font-size: 14px;
+  }
+
+  .category-filters {
+    margin-top: 30px;
+  }
+}
+/* =========================================
+   SERVICE DETAILS PAGE
+   ========================================= */
+
+.service-details-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  padding: 50px 42px 80px;
+
+  box-sizing: border-box;
+}
+
+
+/* Back link */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 38px;
+
+  color: #7faef0;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #a6c8f8;
+}
+
+
+/* Header */
+
+.service-details-header {
+  max-width: 850px;
+}
+
+.service-details-header .hero-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 7px 12px;
+
+  border: 1px solid #2b4261;
+  border-radius: 20px;
+
+  background: #182638;
+  color: #82b2f4;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.service-details-header h1 {
+  margin: 20px 0 12px;
+
+  color: #f3f7fc;
+
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.service-details-header > p {
+  margin: 0;
+
+  color: #9aadc5;
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.service-details-header .service-overview {
+  margin-top: 14px;
+
+  color: #8297b0;
+}
+
+
+/* Detail cards */
+
+.service-detail-card {
+  margin-top: 30px;
+  padding: 25px;
+
+  border: 1px solid #27374c;
+  border-radius: 16px;
+
+  background: #151d28;
+}
+
+.service-detail-card h2 {
+  margin: 0 0 18px;
+
+  color: #edf3f9;
+
+  font-size: 19px;
+  line-height: 1.4;
+}
+
+.service-detail-card ul,
+.service-detail-card ol {
+  margin: 0;
+  padding-left: 22px;
+
+  color: #91a6bf;
+
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.service-detail-card li {
+  padding-left: 5px;
+  margin-bottom: 8px;
+}
+
+.service-detail-card li:last-child {
+  margin-bottom: 0;
+}
+
+
+/* Eligibility */
+
+.service-eligibility {
+  border-color: #29405b;
+  background: #151f2c;
+}
+
+
+/* Two-column details */
+
+.service-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+
+  margin-top: 18px;
+}
+
+.service-details-grid .service-detail-card {
+  margin-top: 0;
+}
+
+
+/* Official information */
+
+.official-info {
+  margin-top: 22px;
+  padding: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  border: 1px solid #29405d;
+  border-radius: 16px;
+
+  background: linear-gradient(
+    135deg,
+    #151f2d,
+    #111a27
+  );
+}
+
+.official-label {
+  margin: 0 0 7px;
+
+  color: #70a4ed;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+}
+
+.official-info h2 {
+  margin: 0 0 7px;
+
+  color: #edf3fa;
+
+  font-size: 19px;
+}
+
+.official-info p:last-child {
+  max-width: 650px;
+
+  margin: 0;
+
+  color: #879bb5;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+
+/* Official button/link */
+
+.official-link {
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 11px 17px;
+
+  border: 1px solid #3473d8;
+  border-radius: 10px;
+
+  background: #225fca;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.official-link:hover {
+  background: #2e70dc;
+  transform: translateY(-1px);
+}
+
+.official-link.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.official-link.disabled:hover {
+  background: #225fca;
+  transform: none;
+}
+
+
+/* Service not found */
+
+.service-not-found {
+  min-height: 320px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  border: 1px solid #27374c;
+  border-radius: 18px;
+
+  background: #151d28;
+
+  text-align: center;
+}
+
+.service-not-found > span {
+  font-size: 30px;
+}
+
+.service-not-found h1 {
+  margin: 15px 0 7px;
+
+  color: #edf3fa;
+
+  font-size: 25px;
+}
+
+.service-not-found p {
+  margin: 0 0 20px;
+
+  color: #8498b1;
+
+  font-size: 14px;
+}
+
+.service-primary-link {
+  padding: 10px 16px;
+
+  border-radius: 9px;
+
+  background: #225fca;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 800px) {
+  .service-details-page {
+    padding: 40px 24px 60px;
+  }
+
+  .service-details-header h1 {
+    font-size: 34px;
+  }
+
+  .service-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .official-info {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .official-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .service-details-page {
+    padding: 32px 18px 50px;
+  }
+
+  .service-details-header h1 {
+    font-size: 29px;
+  }
+
+  .service-details-header > p {
+    font-size: 14px;
+  }
+
+  .service-detail-card {
+    padding: 20px;
+  }
+
+  .official-info {
+    padding: 21px;
+  }
+}

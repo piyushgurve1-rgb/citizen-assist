@@ -6,106 +6,183 @@ function ServiceDetails() {
 
   const decodedServiceName = decodeURIComponent(serviceName);
 
-  const service = servicesData[decodedServiceName] || {
-    name: decodedServiceName,
-    description:
-      "Get simple and easy-to-understand guidance for this government service.",
-    documents: [
-      "Aadhaar Card",
-      "Mobile Number",
-      "Address Proof",
-      "Required application documents",
-    ],
-    steps: [
-      "Check your eligibility for the service.",
-      "Keep the required documents ready.",
-      "Fill out the application form.",
-      "Submit the application.",
-      "Track your application status.",
-    ],
-    officialUrl: "#",
-  };
+  const service = servicesData[decodedServiceName];
+
+  if (!service) {
+    return (
+      <section className="service-details-page">
+        <Link
+          to="/services"
+          className="back-link"
+        >
+          ← Back to Services
+        </Link>
+
+        <div className="service-not-found">
+          <span>🔎</span>
+
+          <h1>
+            Service Not Found
+          </h1>
+
+          <p>
+            We could not find the requested government
+            service.
+          </p>
+
+          <Link
+            to="/services"
+            className="service-primary-link"
+          >
+            Explore Services →
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="service-details-page">
-      <Link to="/services" className="back-link">
+
+      {/* Back */}
+      <Link
+        to="/services"
+        className="back-link"
+      >
         ← Back to Services
       </Link>
 
+
+      {/* Header */}
       <div className="service-details-header">
+
         <span className="hero-badge">
-          {service.icon || "🇮🇳"} Government Service
+          {service.icon || "🇮🇳"}{" "}
+          {service.category || "Government Service"}
         </span>
 
-        <h1>{service.name}</h1>
+        <h1>
+          {service.name}
+        </h1>
 
-        <p>{service.description}</p>
+        <p>
+          {service.description}
+        </p>
 
         {service.overview && (
           <p className="service-overview">
             {service.overview}
           </p>
         )}
+
       </div>
 
-      {service.eligibility && (
+
+      {/* Eligibility */}
+      {service.eligibility?.length > 0 && (
         <div className="service-detail-card service-eligibility">
-          <h2>✅ Eligibility</h2>
+
+          <h2>
+            ✅ Eligibility
+          </h2>
 
           <ul>
             {service.eligibility.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item}>
+                {item}
+              </li>
             ))}
           </ul>
+
         </div>
       )}
 
+
+      {/* Main Details */}
       <div className="service-details-grid">
+
+        {/* Documents */}
         <div className="service-detail-card">
-          <h2>📋 Required Documents</h2>
+
+          <h2>
+            📋 Required Documents
+          </h2>
 
           <ul>
-            {service.documents.map((document) => (
-              <li key={document}>{document}</li>
+            {service.documents?.map((document) => (
+              <li key={document}>
+                {document}
+              </li>
             ))}
           </ul>
+
         </div>
 
+
+        {/* Steps */}
         <div className="service-detail-card">
-          <h2>📝 Step-by-Step Guidance</h2>
+
+          <h2>
+            📝 Step-by-Step Guidance
+          </h2>
 
           <ol>
-            {service.steps.map((step, index) => (
-              <li key={index}>{step}</li>
+            {service.steps?.map((step, index) => (
+              <li key={index}>
+                {step}
+              </li>
             ))}
           </ol>
+
         </div>
+
       </div>
 
+
+      {/* Official Information */}
       <div className="official-info">
-        <h2>🔗 Official Information</h2>
 
-        <p>
-          For the latest information, eligibility rules and application
-          process, visit the official government website.
-        </p>
+        <div>
+          <p className="official-label">
+            OFFICIAL INFORMATION
+          </p>
 
-        {service.officialUrl && service.officialUrl !== "#" ? (
+          <h2>
+            Use the official government website
+          </h2>
+
+          <p>
+            For the latest rules, eligibility
+            requirements and application process,
+            use the official government source.
+          </p>
+        </div>
+
+        {service.officialUrl &&
+        service.officialUrl !== "#" ? (
           <a
             href={service.officialUrl}
             target="_blank"
             rel="noopener noreferrer"
+            className="official-link"
           >
-            <button type="button">
-              Visit Official Website →
-            </button>
+            Visit Official Website
+            <span aria-hidden="true">
+              →
+            </span>
           </a>
         ) : (
-          <button type="button" disabled>
+          <button
+            type="button"
+            className="official-link disabled"
+            disabled
+          >
             Official Link Coming Soon
           </button>
         )}
+
       </div>
+
     </section>
   );
 }
