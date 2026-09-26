@@ -63,7 +63,9 @@ function ChatWidget({
   };
 
   const generateReply = (userMessage) => {
-  const service = findService(userMessage);
+  const detectedService = findService(userMessage);
+  const service = selectedService || detectedService;
+
   const text = userMessage.toLowerCase();
 
   const isHindi =
@@ -95,6 +97,7 @@ function ChatWidget({
 
   const asksSteps =
     text.includes("step") ||
+    text.includes("steps") ||
     text.includes("process") ||
     text.includes("apply") ||
     text.includes("application") ||
@@ -113,100 +116,130 @@ function ChatWidget({
 
   if (asksDocuments) {
     if (isHindi) {
-      return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:\n\n${service.documents
-        .map(
-          (document, index) =>
-            `${index + 1}. ${document}`
-        )
-        .join("\n")}`;
+      return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
+
+${service.documents
+  .map(
+    (document, index) =>
+      `${index + 1}. ${document}`
+  )
+  .join("\n")}`;
     }
 
     if (isMarathi) {
-      return `${service.name} साठी सामान्यतः आवश्यक कागदपत्रे:\n\n${service.documents
-        .map(
-          (document, index) =>
-            `${index + 1}. ${document}`
-        )
-        .join("\n")}`;
+      return `${service.name} साठी सामान्यतः आवश्यक कागदपत्रे:
+
+${service.documents
+  .map(
+    (document, index) =>
+      `${index + 1}. ${document}`
+  )
+  .join("\n")}`;
     }
 
-    return `${service.name} commonly required documents:\n\n${service.documents
-      .map(
-        (document, index) =>
-          `${index + 1}. ${document}`
-      )
-      .join("\n")}`;
+    return `${service.name} commonly required documents:
+
+${service.documents
+  .map(
+    (document, index) =>
+      `${index + 1}. ${document}`
+  )
+  .join("\n")}`;
   }
 
   if (asksSteps) {
     if (isHindi) {
-      return `${service.name} के आवेदन की सामान्य प्रक्रिया:\n\n${service.steps
-        .map(
-          (step, index) =>
-            `${index + 1}. ${step}`
-        )
-        .join("\n")}`;
+      return `${service.name} के आवेदन की सामान्य प्रक्रिया:
+
+${service.steps
+  .map(
+    (step, index) =>
+      `${index + 1}. ${step}`
+  )
+  .join("\n")}`;
     }
 
     if (isMarathi) {
-      return `${service.name} साठी अर्ज करण्याची सामान्य प्रक्रिया:\n\n${service.steps
-        .map(
-          (step, index) =>
-            `${index + 1}. ${step}`
-        )
-        .join("\n")}`;
+      return `${service.name} साठी अर्ज करण्याची सामान्य प्रक्रिया:
+
+${service.steps
+  .map(
+    (step, index) =>
+      `${index + 1}. ${step}`
+  )
+  .join("\n")}`;
     }
 
-    return `${service.name} basic application steps:\n\n${service.steps
-      .map(
-        (step, index) =>
-          `${index + 1}. ${step}`
-      )
-      .join("\n")}`;
+    return `${service.name} basic application steps:
+
+${service.steps
+  .map(
+    (step, index) =>
+      `${index + 1}. ${step}`
+  )
+  .join("\n")}`;
   }
 
   if (asksEligibility) {
     if (isHindi) {
-      return `${service.name} की पात्रता:\n\n${service.eligibility
-        .map(
-          (item, index) =>
-            `${index + 1}. ${item}`
-        )
-        .join("\n")}`;
+      return `${service.name} की पात्रता:
+
+${service.eligibility
+  .map(
+    (item, index) =>
+      `${index + 1}. ${item}`
+  )
+  .join("\n")}`;
     }
 
     if (isMarathi) {
-      return `${service.name} साठी पात्रता:\n\n${service.eligibility
-        .map(
-          (item, index) =>
-            `${index + 1}. ${item}`
-        )
-        .join("\n")}`;
+      return `${service.name} साठी पात्रता:
+
+${service.eligibility
+  .map(
+    (item, index) =>
+      `${index + 1}. ${item}`
+  )
+  .join("\n")}`;
     }
 
-    return `${service.name} eligibility:\n\n${service.eligibility
-      .map(
-        (item, index) =>
-          `${index + 1}. ${item}`
-      )
-      .join("\n")}`;
+    return `${service.name} eligibility:
+
+${service.eligibility
+  .map(
+    (item, index) =>
+      `${index + 1}. ${item}`
+  )
+  .join("\n")}`;
   }
 
   if (isHindi) {
-    return `${service.name}\n\n${
-      service.overview || service.description
-    }\n\nआप "documents", "steps" या "eligibility" पूछ सकते हैं।`;
+    return `${service.name}
+
+${
+  service.overview || service.description
+}
+
+आप "${service.name}" के documents, steps या eligibility के बारे में पूछ सकते हैं।`;
   }
 
   if (isMarathi) {
-    return `${service.name}\n\n${
-      service.overview || service.description
-    }\n\nतुम्ही "documents", "steps" किंवा "eligibility" विचारू शकता.`;
+    return `${service.name}
+
+${
+  service.overview || service.description
+}
+
+तुम्ही "${service.name}" ची कागदपत्रे, प्रक्रिया किंवा पात्रता विचारू शकता.`;
   }
 
-  return `${service.name}\n\n${
-    service.overview || service.description
-  }\n\nYou can ask about "documents", "steps" or "eligibility".`;
+  return `${service.name}
+
+${
+  service.overview || service.description
+}
+
+You can ask about "${service.name}" documents, steps or eligibility.`;
 };
   const addServiceContext = () => {
   if (!selectedService) {
