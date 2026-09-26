@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { servicesData } from "../data/services";
 
-function ServiceDetails() {
+function ServiceDetails({ onAskAssistant }) {
   const { serviceName } = useParams();
 
   const decodedServiceName = decodeURIComponent(serviceName);
@@ -42,9 +42,7 @@ function ServiceDetails() {
   }
 
   const handleAskAssistant = () => {
-    console.log(
-      `Ask AI Assistant about ${service.name}`
-    );
+    onAskAssistant(service);
   };
 
   return (

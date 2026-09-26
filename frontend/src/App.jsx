@@ -10,28 +10,49 @@ import ChatWidget from "./components/ChatWidget";
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en-IN");
+  const [selectedService, setSelectedService] = useState(null);
+
+  const openChat = (service = null) => {
+    setSelectedService(service);
+    setIsChatOpen(true);
+  };
+
   return (
     <BrowserRouter>
       <Navbar
-  onOpenChat={() => setIsChatOpen(true)}
-/>
+        onOpenChat={() => openChat()}
+      />
 
       <main>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
+          <Route
+            path="/"
+            element={<Home />}
+          />
+
+          <Route
+            path="/services"
+            element={<Services />}
+          />
+
           <Route
             path="/services/:serviceName"
-            element={<ServiceDetails />}
+            element={
+              <ServiceDetails
+                onAskAssistant={openChat}
+              />
+            }
           />
         </Routes>
       </main>
+
       <ChatWidget
-  isOpen={isChatOpen}
-  setIsOpen={setIsChatOpen}
-  selectedLanguage={selectedLanguage}
-  setSelectedLanguage={setSelectedLanguage}
-/>
+        isOpen={isChatOpen}
+        setIsOpen={setIsChatOpen}
+        selectedLanguage={selectedLanguage}
+        setSelectedLanguage={setSelectedLanguage}
+        selectedService={selectedService}
+      />
     </BrowserRouter>
   );
 }

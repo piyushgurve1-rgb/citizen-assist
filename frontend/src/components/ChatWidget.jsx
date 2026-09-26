@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { servicesData } from "../data/services";
 
 function ChatWidget({
@@ -6,6 +6,7 @@ function ChatWidget({
   setIsOpen,
   selectedLanguage,
   setSelectedLanguage,
+  selectedService,
 }) {
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -21,6 +22,9 @@ function ChatWidget({
       time: "Now",
     },
   ]);
+  const serviceContextMessage = selectedService
+  ? `I can help you with ${selectedService.name}. You can ask about eligibility, required documents, application steps or other details.`
+  : null;
 
   const languages = [
     { code: "en-IN", name: "English" },
@@ -204,7 +208,37 @@ function ChatWidget({
     service.overview || service.description
   }\n\nYou can ask about "documents", "steps" or "eligibility".`;
 };
-  const handleSend = () => {
+  const addServiceContext = () => {
+  if (!selectedService) {
+    return;
+  }
+
+  const contextMessage = {
+    sender: "ai",
+    text: `You are viewing ${selectedService.name}. I can help you with its eligibility, required documents, application steps and other information.`,
+    time: "Now",
+  };
+
+  setMessages((current) => {
+    const alreadyShown = current.some(
+      (msg) => msg.text === contextMessage.text
+    );
+
+    if (alreadyShown) {
+      return current;
+    }
+
+    return [...current, contextMessage];
+  });
+};
+useEffect(() => {
+  if (isOpen && selectedService) {
+    addServiceContext();
+  }
+}, [isOpen, selectedService]);
+
+const handleSend = () => {
+  addServiceContext();
     const userMessage = message.trim();
 
     if (!userMessage) {
