@@ -7,6 +7,7 @@ function ChatWidget({
   selectedLanguage,
   setSelectedLanguage,
   selectedService,
+  initialAction,
 }) {
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -295,6 +296,35 @@ You can ask about this service's documents, steps or eligibility.`;
       addServiceContext();
     }
   }, [isOpen, selectedService]);
+  useEffect(() => {
+  if (
+    isOpen &&
+    initialAction === "documents" &&
+    !selectedService
+  ) {
+    setMessages((current) => {
+      const alreadyShown = current.some(
+        (msg) =>
+          msg.text ===
+          "Sure! I can help you find the documents required for a government service. Please tell me the service name."
+      );
+
+      if (alreadyShown) {
+        return current;
+      }
+
+      return [
+        ...current,
+        {
+          sender: "ai",
+          text:
+            "Sure! I can help you find the documents required for a government service. Please tell me the service name.",
+          time: "Now",
+        },
+      ];
+    });
+  }
+}, [isOpen, initialAction, selectedService]);
 
   const handleSend = () => {
     addServiceContext();

@@ -11,11 +11,13 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en-IN");
   const [selectedService, setSelectedService] = useState(null);
+  const [initialAction, setInitialAction] = useState(null);
 
   const openChat = (service = null, action = null) => {
-  setSelectedService(service);
-  setIsChatOpen(true);
-};
+    setSelectedService(service);
+    setInitialAction(action);
+    setIsChatOpen(true);
+  };
 
   return (
     <BrowserRouter>
@@ -51,12 +53,13 @@ function App() {
       </main>
 
       <ChatWidget
-        isOpen={isChatOpen}
-        setIsOpen={setIsChatOpen}
-        selectedLanguage={selectedLanguage}
-        setSelectedLanguage={setSelectedLanguage}
-        selectedService={selectedService}
-      />
+  isOpen={isChatOpen}
+  setIsOpen={setIsChatOpen}
+  selectedLanguage={selectedLanguage}
+  setSelectedLanguage={setSelectedLanguage}
+  selectedService={selectedService}
+  initialAction={initialAction}
+/>
     </BrowserRouter>
   );
 }
