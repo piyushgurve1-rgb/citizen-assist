@@ -330,6 +330,72 @@ You can ask about this service's documents, steps or eligibility.`;
     }, 400);
   };
 
+  const handleQuickAction = (action) => {
+    let userText = "";
+    let reply = "";
+
+    if (action === "documents") {
+      userText = selectedService
+        ? `I need documents for ${selectedService.name}.`
+        : "I need document information for a government service.";
+
+      reply = generateReply("documents");
+    }
+
+    if (action === "eligibility") {
+      userText = selectedService
+        ? `What is the eligibility for ${selectedService.name}?`
+        : "I want to know the eligibility.";
+
+      reply = generateReply("eligibility");
+    }
+
+    if (action === "steps") {
+      userText = selectedService
+        ? `How can I apply for ${selectedService.name}?`
+        : "I want to know the application steps.";
+
+      reply = generateReply("steps");
+    }
+
+    if (action === "official") {
+      if (selectedService?.officialUrl &&
+          selectedService.officialUrl !== "#") {
+        window.open(
+          selectedService.officialUrl,
+          "_blank",
+          "noopener,noreferrer"
+        );
+        return;
+      }
+
+      userText = "I want the official website.";
+
+      reply =
+        "The official website link is not available for this service yet.";
+    }
+
+    setMessages((current) => [
+      ...current,
+      {
+        sender: "user",
+        text: userText,
+        time: "Now",
+      },
+    ]);
+
+    setTimeout(() => {
+      setMessages((current) => [
+        ...current,
+        {
+          sender: "ai",
+          text: reply,
+          time: "Now",
+        },
+      ]);
+    }, 400);
+  };
+
   const startVoiceInput = () => {
     const SpeechRecognition =
       window.SpeechRecognition ||
@@ -396,33 +462,35 @@ You can ask about this service's documents, steps or eligibility.`;
     setShowLanguages(false);
   };
 
-  const handleQuickAction = (text) => {
-    setMessages((current) => [
-      ...current,
-      {
-        sender: "user",
-        text,
-        time: "Now",
-      },
-    ]);
-
-    setTimeout(() => {
-      const reply =
-        text ===
-        "I want to apply for a government service."
-          ? "Sure! Tell me the government service you want to apply for. For example: Passport, PM-KISAN or Driving Licence."
-          : "Sure! Tell me the service name and I can show you the commonly required documents.";
-
-      setMessages((current) => [
-        ...current,
+  const quickActions = selectedService
+    ? [
         {
-          sender: "ai",
-          text: reply,
-          time: "Now",
+          label: "📋 Documents",
+          action: "documents",
         },
-      ]);
-    }, 400);
-  };
+        {
+          label: "✅ Eligibility",
+          action: "eligibility",
+        },
+        {
+          label: "📝 Steps",
+          action: "steps",
+        },
+        {
+          label: "🔗 Official Website",
+          action: "official",
+        },
+      ]
+    : [
+        {
+          label: "Apply Now",
+          action: "steps",
+        },
+        {
+          label: "View Documents",
+          action: "documents",
+        },
+      ];
 
   return (
     <>
@@ -510,27 +578,19 @@ You can ask about this service's documents, steps or eligibility.`;
 
           <div className="quick-actions">
 
-            <button
-              type="button"
-              onClick={() =>
-                handleQuickAction(
-                  "I want to apply for a government service."
-                )
-              }
-            >
-              Apply Now
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                handleQuickAction(
-                  "I need document information for a government service."
-                )
-              }
-            >
-              View Documents
-            </button>
+            {quickActions.map((action) => (
+              <button
+                type="button"
+                key={action.action}
+                onClick={() =>
+                  handleQuickAction(
+                    action.action
+                  )
+                }
+              >
+                {action.label}
+              </button>
+            ))}
 
           </div>
 
