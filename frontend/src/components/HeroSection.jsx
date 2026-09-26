@@ -36,10 +36,9 @@ function HeroSection({ onOpenChat }) {
     }
 
     if (action === "documents") {
-      onOpenChat();
-      return;
-    }
-
+  onOpenChat(null, "documents");
+  return;
+}
     if (action === "chat") {
       onOpenChat();
     }

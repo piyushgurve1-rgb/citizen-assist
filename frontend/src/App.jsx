@@ -12,10 +12,10 @@ function App() {
   const [selectedLanguage, setSelectedLanguage] = useState("en-IN");
   const [selectedService, setSelectedService] = useState(null);
 
-  const openChat = (service = null) => {
-    setSelectedService(service);
-    setIsChatOpen(true);
-  };
+  const openChat = (service = null, action = null) => {
+  setSelectedService(service);
+  setIsChatOpen(true);
+};
 
   return (
     <BrowserRouter>
