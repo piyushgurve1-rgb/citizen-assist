@@ -597,6 +597,37 @@ A valid and active mobile number may be needed for OTP, verification or applicat
 
 Enter your mobile number only on an official and trusted government website or at an authorised service centre.`;
 }
+   // -----------------------------
+// Email Address Explanation
+// -----------------------------
+const asksEmail =
+  text.includes("email") ||
+  text.includes("email address") ||
+  text.includes("e mail");
+
+if (asksEmail) {
+  if (isHindi) {
+    return `${service.name} के लिए Email Address की आवश्यकता हो सकती है।
+
+सही और active email address देना जरूरी हो सकता है, क्योंकि इसका उपयोग application updates, communication या verification के लिए किया जा सकता है।
+
+अपना email address केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
+  }
+
+  if (isMarathi) {
+    return `${service.name} साठी Email Address आवश्यक असू शकतो.
+
+योग्य आणि active email address देणे आवश्यक असू शकते, कारण त्याचा वापर application updates, communication किंवा verification साठी केला जाऊ शकतो.
+
+तुमचा email address फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
+  }
+
+  return `${service.name} may require an email address.
+
+A valid and active email address may be needed for application updates, communication or verification.
+
+Enter your email address only on an official and trusted government website or at an authorised service centre.`;
+}
     if (asksDocuments) {
       if (isHindi) {
         return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
