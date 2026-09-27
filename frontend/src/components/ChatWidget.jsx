@@ -912,6 +912,8 @@ You can ask about this service's documents, steps or eligibility.`;
   const handleDocumentServiceSelect = (service) => {
     const userText = service.name;
 
+    setCurrentChatService(service);
+
     setMessages((current) => [
       ...current,
       {
@@ -1056,9 +1058,14 @@ You can ask about this service's documents, steps or eligibility.`;
 
           {/* Service Selection */}
 {isOpen &&
-  !selectedService &&
-  (
+  !selectedService && 
+  !currentChatService &&(
     <div className="document-service-options">
+      <div className="service-selection-heading">
+        <strong>Choose a Government Service</strong>
+        <span>Select a service to get started</span>
+      </div>
+
       {documentServices.map((service) => (
         <button
           type="button"
@@ -1072,7 +1079,6 @@ You can ask about this service's documents, steps or eligibility.`;
       ))}
     </div>
   )}
-
           {/* Quick Actions */}
           <div className="quick-actions">
             {quickActions.map((action) => (
