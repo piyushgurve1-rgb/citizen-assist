@@ -1054,24 +1054,24 @@ You can ask about this service's documents, steps or eligibility.`;
             ))}
           </div>
 
-          {/* Document Service Options */}
-          {isOpen &&
-            initialAction === "documents" &&
-            !selectedService && (
-              <div className="document-service-options">
-                {documentServices.map((service) => (
-                  <button
-                    type="button"
-                    key={service.name}
-                    onClick={() =>
-                      handleDocumentServiceSelect(service)
-                    }
-                  >
-                    {service.name}
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Service Selection */}
+{isOpen &&
+  !selectedService &&
+  (
+    <div className="document-service-options">
+      {documentServices.map((service) => (
+        <button
+          type="button"
+          key={service.name}
+          onClick={() =>
+            handleDocumentServiceSelect(service)
+          }
+        >
+          {service.name}
+        </button>
+      ))}
+    </div>
+  )}
 
           {/* Quick Actions */}
           <div className="quick-actions">
