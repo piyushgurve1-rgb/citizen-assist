@@ -254,6 +254,22 @@ if (
 
   return "Enter the correct 6-digit PIN code for your address in the PIN Code field.";
 }
+if (
+  lowerMessage.includes("aadhaar number") ||
+  lowerMessage.includes("aadhar number") ||
+  lowerMessage.includes("aadhaar no") ||
+  lowerMessage.includes("aadhar no")
+) {
+  if (isHindi) {
+    return "Aadhaar Number field में अपना सही 12-digit Aadhaar number भरें। इसे केवल official और trusted government website पर ही दर्ज करें।";
+  }
+
+  if (isMarathi) {
+    return "Aadhaar Number field मध्ये तुमचा योग्य 12 अंकी Aadhaar number भरा. तो फक्त official आणि trusted government website वरच टाका.";
+  }
+
+  return "Enter your correct 12-digit Aadhaar number in the Aadhaar Number field. Enter it only on an official and trusted government website.";
+}
     // No service detected
     if (!service) {
       if (isHindi) {
