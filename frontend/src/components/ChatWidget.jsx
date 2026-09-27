@@ -154,14 +154,62 @@ function ChatWidget({
     }
 
     const service =
-  detectedService ||
-  selectedService ||
-  currentChatService;
-    const text = userMessage.toLowerCase();
+     detectedService ||
+     selectedService ||
+     currentChatService;
+     const lowerMessage = userMessage.toLowerCase();
+     const text = userMessage.toLowerCase();
 
-    const isHindi = selectedLanguage === "hi-IN";
-    const isMarathi = selectedLanguage === "mr-IN";
+const isHindi = selectedLanguage === "hi-IN";
+const isMarathi = selectedLanguage === "mr-IN";
 
+if (
+  lowerMessage.includes("father name") ||
+  lowerMessage.includes("father's name") ||
+  lowerMessage.includes("father")
+) {
+  if (isHindi) {
+    return "Father's Name field में अपने पिता का पूरा नाम भरें, जैसा कि आपके official document में लिखा है।";
+  }
+
+  if (isMarathi) {
+    return "Father's Name field मध्ये तुमच्या वडिलांचे पूर्ण नाव भरा, जसे तुमच्या official document मध्ये लिहिले आहे.";
+  }
+
+  return "Enter your father's full name in the Father's Name field, exactly as written on your official document.";
+}
+if (
+  lowerMessage.includes("date of birth") ||
+  lowerMessage.includes("dob") ||
+  lowerMessage.includes("birth date")
+) {
+  if (isHindi) {
+    return "Date of Birth field में अपनी जन्मतिथि भरें, जैसा कि आपके official document में दर्ज है।";
+  }
+
+  if (isMarathi) {
+    return "Date of Birth field मध्ये तुमची जन्मतारीख भरा, जशी तुमच्या official document मध्ये नमूद आहे.";
+  }
+
+  return "Enter your date of birth in the Date of Birth field, exactly as written on your official document.";
+}
+if (
+  lowerMessage.includes("mobile number") ||
+  lowerMessage.includes("mobile no") ||
+  lowerMessage.includes("phone number") ||
+  lowerMessage.includes("phone no")
+) {
+  if (isHindi) {
+    return "Mobile Number field में अपना चालू मोबाइल नंबर भरें, जिस पर OTP या application-related updates प्राप्त हो सकें।";
+  }
+
+  if (isMarathi) {
+    return "Mobile Number field मध्ये तुमचा सध्या वापरत असलेला मोबाइल नंबर भरा, ज्यावर OTP किंवा अर्जाशी संबंधित अपडेट्स मिळू शकतात.";
+  }
+
+  return "Enter your active mobile number in the Mobile Number field, as it may be used for OTPs or application-related updates.";
+}
+    
     // No service detected
     if (!service) {
       if (isHindi) {
