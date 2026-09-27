@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 function Login() {
   return (
     <div className="login-page">
@@ -29,7 +30,8 @@ function Login() {
         </form>
 
         <p className="login-register">
-          Don't have an account? <span>Register</span>
+          Don't have an account?{" "}
+         <Link to="/register">Register</Link>
         </p>
       </div>
     </div>
