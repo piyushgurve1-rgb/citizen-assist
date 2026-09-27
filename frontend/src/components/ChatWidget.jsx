@@ -270,6 +270,21 @@ if (
 
   return "Enter your correct 12-digit Aadhaar number in the Aadhaar Number field. Enter it only on an official and trusted government website.";
 }
+if (
+  lowerMessage.includes("gender") ||
+  lowerMessage.includes("male or female") ||
+  lowerMessage.includes("sex")
+) {
+  if (isHindi) {
+    return "Gender field में अपना सही gender चुनें, जैसे Male, Female या उपलब्ध अन्य option।";
+  }
+
+  if (isMarathi) {
+    return "Gender field मध्ये तुमचे योग्य gender निवडा, जसे Male, Female किंवा उपलब्ध असलेला इतर option.";
+  }
+
+  return "Select your correct gender in the Gender field, such as Male, Female, or another available option.";
+}
     // No service detected
     if (!service) {
       if (isHindi) {
