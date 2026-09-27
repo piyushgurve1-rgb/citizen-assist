@@ -945,39 +945,29 @@ You can ask about this service's documents, steps or eligibility.`;
   // Chat Quick Action Buttons
   // -----------------------------
   const quickActions = selectedService
-    ? [
-        {
-          label: "📋 Documents",
-          action: "documents",
-        },
-        {
-          label: "✅ Eligibility",
-          action: "eligibility",
-        },
-        {
-          label: "📝 Steps",
-          action: "steps",
-        },
-        {
-          label: "🔗 Official Website",
-          action: "official",
-        },
-        {
-         label: "🔄 New Service",
-         action: "new-service",
-        },
-      ]
-    : [
-        {
-          label: "Apply Now",
-          action: "steps",
-        },
-        {
-          label: "View Documents",
-          action: "documents",
-        },
-      ];
-
+  ? [
+      {
+        label: "📋 Documents",
+        action: "documents",
+      },
+      {
+        label: "✅ Eligibility",
+        action: "eligibility",
+      },
+      {
+        label: "📝 Steps",
+        action: "steps",
+      },
+      {
+        label: "🔗 Official Website",
+        action: "official",
+      },
+      {
+        label: "🔄 New Service",
+        action: "new-service",
+      },
+    ]
+  : [];
   // -----------------------------
   // UI
   // -----------------------------

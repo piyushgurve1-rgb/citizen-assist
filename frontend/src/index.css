@@ -1308,41 +1308,35 @@ main {
 
 .quick-actions {
   display: flex;
-
-  gap: 8px;
-
-  padding: 11px 14px;
-
+  gap: 7px;
+  padding: 9px 12px;
   border-top: 1px solid #e5e7eb;
-
-  background: white;
-
+  background: #ffffff;
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .quick-actions::-webkit-scrollbar {
-  height: 3px;
+  display: none;
 }
 
 .quick-actions button {
+  flex: 0 0 auto;
   white-space: nowrap;
-
-  padding: 8px 13px;
-
-  border: 1px solid #bfdbfe;
-  border-radius: 22px;
-
-  background: #f0f7ff;
+  padding: 7px 11px;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  background: #f8fafc;
   color: #2563eb;
-
   font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .quick-actions button:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
-
-  transform: translateY(-1px);
+  background: #eff6ff;
+  border-color: #bfdbfe;
 }
 
 
@@ -2919,6 +2913,23 @@ main {
   .official-info {
     padding: 21px;
   }
+}
+.service-selection-heading {
+  grid-column: 1 / -1;
+  padding: 2px 2px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.service-selection-heading strong {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.service-selection-heading span {
+  font-size: 11px;
+  color: #64748b;
 }
 /* Service selection buttons */
 .document-service-options {
