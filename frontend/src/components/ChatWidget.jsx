@@ -25,6 +25,19 @@ function ChatWidget({
       time: "Now",
     },
   ]);
+  const resetChat = () => {
+  setMessages([
+    {
+      sender: "ai",
+      text:
+        "Hello! 👋 I am CitizenAssist. Ask me about government services, documents, eligibility or application steps.",
+      time: "Now",
+    },
+  ]);
+
+  setCurrentChatService(null);
+  setChatServiceOverride(null);
+};
 
   const languages = [
     { code: "en-IN", name: "English" },
@@ -735,10 +748,11 @@ You can ask about this service's documents, steps or eligibility.`;
       reply = generateReply("steps");
     }
     if (action === "new-service") {
-       setCurrentChatService(null);
-       setChatServiceOverride(true);
-       setMessages((current) => [
-       ...current,
+  resetChat();
+  setChatServiceOverride(true);
+
+  setMessages((current) => [
+    ...current,
     {
       sender: "ai",
       text: "Sure! Which government service would you like help with next?",
