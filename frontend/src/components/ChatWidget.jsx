@@ -239,7 +239,21 @@ if (
 
   return "Enter your current address in the Address field, including your house number, street, city, district and PIN code.";
 }
-    
+    if (
+  lowerMessage.includes("pin code") ||
+  lowerMessage.includes("pincode") ||
+  lowerMessage.includes("postal code")
+) {
+  if (isHindi) {
+    return "PIN Code field में अपने पते का सही 6-digit PIN code भरें।";
+  }
+
+  if (isMarathi) {
+    return "PIN Code field मध्ये तुमच्या पत्त्याचा योग्य 6 अंकी PIN code भरा.";
+  }
+
+  return "Enter the correct 6-digit PIN code for your address in the PIN Code field.";
+}
     // No service detected
     if (!service) {
       if (isHindi) {
