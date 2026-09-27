@@ -101,13 +101,51 @@ function ChatWidget({
 };
 
   const findService = (userMessage) => {
-  const text = userMessage.toLowerCase();
-
+  const text = userMessage
+  .toLowerCase()
+  .replace(/[-_]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
   const userWords = text
     .split(/\s+/)
     .filter((word) => word.length >= 3);
+    const serviceIntentWords = [
+  "document",
+  "documents",
+  "eligibility",
+  "eligible",
+  "elgibility",
+  "steps",
+  "step",
+  "process",
+  "apply",
+  "application",
+  "how",
+  "kaise",
+  "proof",
+];
+const serviceSearchWords = userWords.filter(
+  (word) => !serviceIntentWords.includes(word)
+);
 
   const services = Object.values(servicesData);
+  const exactService = services.find((service) => {
+  const name = service.name
+  .toLowerCase()
+  .replace(/[-_]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+  return (
+    text === name ||
+    text.includes(name) ||
+    name.includes(text)
+  );
+});
+
+if (exactService) {
+  return exactService;
+}
 
   let bestService = null;
   let bestScore = 0;
@@ -130,7 +168,7 @@ function ChatWidget({
 
     let serviceScore = 0;
 
-    userWords.forEach((userWord) => {
+    serviceSearchWords.forEach((userWord) => {
       serviceWords.forEach((serviceWord) => {
         if (userWord === serviceWord) {
           serviceScore += 3;
@@ -162,18 +200,22 @@ function ChatWidget({
   // -----------------------------
   const generateReply = (userMessage) => {
     const detectedService = findService(userMessage);
+    const hasServiceName = detectedService !== null;
 
     if (detectedService) {
       setCurrentChatService(detectedService);
     }
 
     const service =
-      chatServiceOverride
-        ? detectedService || null
-        : selectedService || currentChatService || detectedService;
+  selectedService ||
+  detectedService ||
+  currentChatService;
      const lowerMessage = userMessage.toLowerCase();
-     const text = userMessage.toLowerCase();
-
+     const text = userMessage
+  .toLowerCase()
+  .replace(/[-_]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
 const isHindi = selectedLanguage === "hi-IN";
 const isMarathi = selectedLanguage === "mr-IN";
 
@@ -421,6 +463,7 @@ if (
     const asksEligibility =
       text.includes("eligible") ||
       text.includes("eligibility") ||
+      text.includes("elgibility") ||
       text.includes("who can") ||
       text.includes("patra") ||
       text.includes("patrata") ||
