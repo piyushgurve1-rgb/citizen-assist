@@ -36,50 +36,133 @@ function ChatWidget({
       (language) => language.code === selectedLanguage
     )?.name || "English";
 
-  const findService = (userMessage) => {
-    const text = userMessage.toLowerCase();
-    const services = Object.values(servicesData);
+  // -----------------------------
+  // Voice Output
+  // -----------------------------
+  const speakReply = (text) => {
+    if (!("speechSynthesis" in window)) {
+      return;
+    }
 
-    return services.find((service) => {
-      const searchableText = [
-        service.name,
-        service.category,
-        service.description,
-        service.overview,
-        ...(service.keywords || []),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+    window.speechSynthesis.cancel();
 
-      return searchableText
-        .split(" ")
-        .some(
-          (word) =>
-            word.length > 2 && text.includes(word)
-        );
-    });
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    utterance.lang = selectedLanguage || "en-IN";
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+
+    window.speechSynthesis.speak(utterance);
   };
 
+  // -----------------------------
+  // Find Government Service
+  // -----------------------------
+  const getEditDistance = (a, b) => {
+  const matrix = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + 1
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+};
+
+  const findService = (userMessage) => {
+  const text = userMessage.toLowerCase();
+
+  const userWords = text
+    .split(/\s+/)
+    .filter((word) => word.length >= 3);
+
+  const services = Object.values(servicesData);
+
+  let bestService = null;
+  let bestScore = 0;
+
+  services.forEach((service) => {
+    const searchableText = [
+      service.name,
+      service.category,
+      service.description,
+      service.overview,
+      ...(service.keywords || []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const serviceWords = searchableText
+      .split(/\s+/)
+      .filter((word) => word.length >= 3);
+
+    let serviceScore = 0;
+
+    userWords.forEach((userWord) => {
+      serviceWords.forEach((serviceWord) => {
+        if (userWord === serviceWord) {
+          serviceScore += 3;
+        } else if (
+          userWord.includes(serviceWord) ||
+          serviceWord.includes(userWord)
+        ) {
+          serviceScore += 2;
+        } else if (
+          serviceWord.length >= 5 &&
+          getEditDistance(userWord, serviceWord) <= 2
+        ) {
+          serviceScore += 1;
+        }
+      });
+    });
+
+    if (serviceScore > bestScore) {
+      bestScore = serviceScore;
+      bestService = service;
+    }
+  });
+
+  return bestService;
+};
+
+  // -----------------------------
+  // Generate AI-style Reply
+  // -----------------------------
   const generateReply = (userMessage) => {
     const detectedService = findService(userMessage);
 
     if (detectedService) {
-  setCurrentChatService(detectedService);
-   }
+      setCurrentChatService(detectedService);
+    }
 
     const service =
-    selectedService ||
-    currentChatService ||
-    detectedService;
+  detectedService ||
+  selectedService ||
+  currentChatService;
     const text = userMessage.toLowerCase();
 
-    const isHindi =
-      selectedLanguage === "hi-IN";
+    const isHindi = selectedLanguage === "hi-IN";
+    const isMarathi = selectedLanguage === "mr-IN";
 
-    const isMarathi =
-      selectedLanguage === "mr-IN";
-
+    // No service detected
     if (!service) {
       if (isHindi) {
         return "मैं PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate और Scholarship जैसी सरकारी सेवाओं में मदद कर सकता हूँ। कृपया सेवा का नाम बताएं।";
@@ -91,11 +174,19 @@ function ChatWidget({
 
       return "I can help with government services such as PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate and Scholarship. Please mention the service name.";
     }
+
+    // -----------------------------
+    // Address Proof
+    // -----------------------------
     const asksAddressProof =
       text.includes("address proof") ||
       text.includes("proof of address") ||
       text.includes("address document") ||
       text.includes("address documents");
+
+    // -----------------------------
+    // Documents
+    // -----------------------------
     const asksDocuments =
       text.includes("document") ||
       text.includes("documents") ||
@@ -110,6 +201,9 @@ function ChatWidget({
       text.includes("कागदपत्र") ||
       text.includes("कागद");
 
+    // -----------------------------
+    // Steps / Application
+    // -----------------------------
     const asksSteps =
       text.includes("step") ||
       text.includes("steps") ||
@@ -127,6 +221,9 @@ function ChatWidget({
       text.includes("कसा") ||
       text.includes("कसे");
 
+    // -----------------------------
+    // Eligibility
+    // -----------------------------
     const asksEligibility =
       text.includes("eligible") ||
       text.includes("eligibility") ||
@@ -139,29 +236,36 @@ function ChatWidget({
       text.includes("कोण पात्र") ||
       text.includes("पात्र कोण");
 
-      if (asksAddressProof) {
-  if (isHindi) {
-    return `${service.name} के लिए Address Proof एक जरूरी दस्तावेज़ हो सकता है।
+    // -----------------------------
+    // Address Proof Reply
+    // -----------------------------
+    if (asksAddressProof) {
+      if (isHindi) {
+        return `${service.name} के लिए Address Proof एक जरूरी दस्तावेज़ हो सकता है।
 
 आमतौर पर स्वीकार किए जाने वाले address proof में Aadhaar Card, Voter ID, Driving Licence, बिजली/पानी का बिल या अन्य मान्य address document शामिल हो सकते हैं।
 
 आवेदन के प्रकार के अनुसार आवश्यक दस्तावेज़ अलग हो सकते हैं।`;
-  }
+      }
 
-  if (isMarathi) {
-    return `${service.name} साठी Address Proof हे आवश्यक कागदपत्र असू शकते.
+      if (isMarathi) {
+        return `${service.name} साठी Address Proof हे आवश्यक कागदपत्र असू शकते.
 
 सामान्यतः Aadhaar Card, Voter ID, Driving Licence, वीज किंवा पाण्याचे बिल किंवा इतर वैध address document स्वीकारले जाऊ शकतात.
 
 अर्जाच्या प्रकारानुसार आवश्यक कागदपत्रे वेगवेगळी असू शकतात.`;
-  }
+      }
 
-  return `${service.name} may require a valid proof of address.
+      return `${service.name} may require a valid proof of address.
 
 Common examples can include Aadhaar Card, Voter ID, Driving Licence, electricity/water bill or another valid address document.
 
 The exact required document can vary depending on the application type.`;
-}
+    }
+
+    // -----------------------------
+    // Documents Reply
+    // -----------------------------
     if (asksDocuments) {
       if (isHindi) {
         return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
@@ -201,6 +305,9 @@ ${service.documents
 You can ask about any specific document for more information.`;
     }
 
+    // -----------------------------
+    // Steps Reply
+    // -----------------------------
     if (asksSteps) {
       if (isHindi) {
         return `${service.name} के लिए आवेदन की सामान्य प्रक्रिया:
@@ -240,6 +347,9 @@ ${service.steps
 You can ask about any specific step for more information.`;
     }
 
+    // -----------------------------
+    // Eligibility Reply
+    // -----------------------------
     if (asksEligibility) {
       if (isHindi) {
         return `${service.name} की पात्रता:
@@ -273,6 +383,9 @@ ${service.eligibility
   .join("\n")}`;
     }
 
+    // -----------------------------
+    // General Service Reply
+    // -----------------------------
     if (isHindi) {
       return `${service.name}
 
@@ -302,6 +415,9 @@ ${
 You can ask about this service's documents, steps or eligibility.`;
   };
 
+  // -----------------------------
+  // Add Selected Service Context
+  // -----------------------------
   const addServiceContext = () => {
     if (!selectedService) {
       return;
@@ -326,12 +442,18 @@ You can ask about this service's documents, steps or eligibility.`;
     });
   };
 
+  // -----------------------------
+  // Selected Service Effect
+  // -----------------------------
   useEffect(() => {
     if (isOpen && selectedService) {
       addServiceContext();
     }
   }, [isOpen, selectedService]);
 
+  // -----------------------------
+  // Document Guidance Effect
+  // -----------------------------
   useEffect(() => {
     if (
       isOpen &&
@@ -362,6 +484,9 @@ You can ask about this service's documents, steps or eligibility.`;
     }
   }, [isOpen, initialAction, selectedService]);
 
+  // -----------------------------
+  // Send Message
+  // -----------------------------
   const handleSend = () => {
     addServiceContext();
 
@@ -393,9 +518,14 @@ You can ask about this service's documents, steps or eligibility.`;
           time: "Now",
         },
       ]);
+
+      speakReply(reply);
     }, 400);
   };
 
+  // -----------------------------
+  // Quick Actions
+  // -----------------------------
   const handleQuickAction = (action) => {
     let userText = "";
     let reply = "";
@@ -434,6 +564,7 @@ You can ask about this service's documents, steps or eligibility.`;
           "_blank",
           "noopener,noreferrer"
         );
+
         return;
       }
 
@@ -461,9 +592,14 @@ You can ask about this service's documents, steps or eligibility.`;
           time: "Now",
         },
       ]);
+
+      speakReply(reply);
     }, 400);
   };
 
+  // -----------------------------
+  // Voice Input
+  // -----------------------------
   const startVoiceInput = () => {
     const SpeechRecognition =
       window.SpeechRecognition ||
@@ -473,6 +609,7 @@ You can ask about this service's documents, steps or eligibility.`;
       alert(
         "Voice input is not supported in this browser. Please use Google Chrome or Microsoft Edge."
       );
+
       return;
     }
 
@@ -504,7 +641,7 @@ You can ask about this service's documents, steps or eligibility.`;
         return;
       }
 
-      setMessage(transcript);
+      setMessage("");
 
       setMessages((current) => [
         ...current,
@@ -526,6 +663,8 @@ You can ask about this service's documents, steps or eligibility.`;
             time: "Now",
           },
         ]);
+
+        speakReply(reply);
       }, 400);
     };
 
@@ -548,11 +687,17 @@ You can ask about this service's documents, steps or eligibility.`;
     recognition.start();
   };
 
+  // -----------------------------
+  // Language Selection
+  // -----------------------------
   const handleLanguageSelect = (languageCode) => {
     setSelectedLanguage(languageCode);
     setShowLanguages(false);
   };
 
+  // -----------------------------
+  // Document Service Selection
+  // -----------------------------
   const documentServices = Object.values(servicesData);
 
   const handleDocumentServiceSelect = (service) => {
@@ -580,9 +725,14 @@ You can ask about this service's documents, steps or eligibility.`;
           time: "Now",
         },
       ]);
+
+      speakReply(reply);
     }, 400);
   };
 
+  // -----------------------------
+  // Chat Quick Action Buttons
+  // -----------------------------
   const quickActions = selectedService
     ? [
         {
@@ -613,13 +763,15 @@ You can ask about this service's documents, steps or eligibility.`;
         },
       ];
 
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
     <>
       {isOpen && (
         <div className="chat-widget">
-
+          {/* Header */}
           <div className="chat-widget-header">
-
             <div className="chat-header-info">
               <div className="chat-header-avatar">
                 🤖
@@ -645,11 +797,10 @@ You can ask about this service's documents, steps or eligibility.`;
             >
               ✕
             </button>
-
           </div>
 
+          {/* Messages */}
           <div className="chat-widget-messages">
-
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -659,7 +810,6 @@ You can ask about this service's documents, steps or eligibility.`;
                     : "chat-ai"
                 }`}
               >
-
                 <div className="chat-avatar">
                   {msg.sender === "user"
                     ? "👤"
@@ -672,9 +822,7 @@ You can ask about this service's documents, steps or eligibility.`;
                       .split("\n")
                       .map(
                         (line, lineIndex) => (
-                          <span
-                            key={lineIndex}
-                          >
+                          <span key={lineIndex}>
                             {line}
 
                             {lineIndex <
@@ -687,16 +835,13 @@ You can ask about this service's documents, steps or eligibility.`;
                       )}
                   </div>
 
-                  <small>
-                    {msg.time}
-                  </small>
+                  <small>{msg.time}</small>
                 </div>
-
               </div>
             ))}
-
           </div>
 
+          {/* Document Service Options */}
           {isOpen &&
             initialAction === "documents" &&
             !selectedService && (
@@ -715,26 +860,23 @@ You can ask about this service's documents, steps or eligibility.`;
               </div>
             )}
 
+          {/* Quick Actions */}
           <div className="quick-actions">
-
             {quickActions.map((action) => (
               <button
                 type="button"
                 key={action.action}
                 onClick={() =>
-                  handleQuickAction(
-                    action.action
-                  )
+                  handleQuickAction(action.action)
                 }
               >
                 {action.label}
               </button>
             ))}
-
           </div>
 
+          {/* Input */}
           <div className="chat-widget-input">
-
             <input
               type="text"
               placeholder={
@@ -753,8 +895,8 @@ You can ask about this service's documents, steps or eligibility.`;
               }}
             />
 
+            {/* Language Selector */}
             <div className="language-selector">
-
               <button
                 type="button"
                 className="language-icon-button"
@@ -770,7 +912,6 @@ You can ask about this service's documents, steps or eligibility.`;
 
               {showLanguages && (
                 <div className="language-menu">
-
                   <div className="language-menu-title">
                     Select Language
                   </div>
@@ -803,12 +944,11 @@ You can ask about this service's documents, steps or eligibility.`;
                       </button>
                     )
                   )}
-
                 </div>
               )}
-
             </div>
 
+            {/* Voice Input */}
             <button
               type="button"
               className={
@@ -826,6 +966,7 @@ You can ask about this service's documents, steps or eligibility.`;
               {isListening ? "⏹️" : "🎤"}
             </button>
 
+            {/* Send */}
             <button
               type="button"
               className="send-button"
@@ -833,12 +974,11 @@ You can ask about this service's documents, steps or eligibility.`;
             >
               ➤
             </button>
-
           </div>
-
         </div>
       )}
 
+      {/* Floating Chat Button */}
       <button
         className="chat-floating-button"
         type="button"
