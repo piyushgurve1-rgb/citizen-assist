@@ -533,6 +533,38 @@ The requirement for an Aadhaar number or Aadhaar card can vary depending on the 
 
 Enter your Aadhaar number only on an official and trusted government website or at an authorised service centre.`;
 }
+   // -----------------------------
+// Bank Account Explanation
+// -----------------------------
+const asksBankAccount =
+  text.includes("bank account") ||
+  text.includes("bank details") ||
+  text.includes("bank") ||
+  text.includes("account number");
+
+if (asksBankAccount) {
+  if (isHindi) {
+    return `${service.name} के लिए Bank Account details की आवश्यकता हो सकती है।
+
+आमतौर पर सही bank account number और bank से जुड़ी जानकारी देनी होती है। PM-KISAN जैसे मामलों में payment या benefit transfer के लिए bank details महत्वपूर्ण हो सकती हैं।
+
+अपनी bank details केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
+  }
+
+  if (isMarathi) {
+    return `${service.name} साठी Bank Account details आवश्यक असू शकतात.
+
+सामान्यतः योग्य bank account number आणि bank संबंधित माहिती द्यावी लागते. PM-KISAN सारख्या सेवांमध्ये payment किंवा benefit transfer साठी bank details महत्त्वाच्या असू शकतात.
+
+तुमची bank details फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
+  }
+
+  return `${service.name} may require bank account details.
+
+You may need to provide the correct bank account number and other bank-related information. For services such as PM-KISAN, bank details can be important for payment or benefit transfer.
+
+Enter your bank details only on an official and trusted government website or at an authorised service centre.`;
+}
     if (asksDocuments) {
       if (isHindi) {
         return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
