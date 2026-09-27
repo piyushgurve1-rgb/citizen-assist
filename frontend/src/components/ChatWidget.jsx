@@ -209,6 +209,21 @@ if (
 
   return "Enter your active mobile number in the Mobile Number field, as it may be used for OTPs or application-related updates.";
 }
+if (
+  lowerMessage.includes("email address") ||
+  lowerMessage.includes("email id") ||
+  lowerMessage.includes("email")
+) {
+  if (isHindi) {
+    return "Email Address field में अपना सही और चालू ईमेल पता भरें, जिस पर application से संबंधित updates मिल सकें।";
+  }
+
+  if (isMarathi) {
+    return "Email Address field मध्ये तुमचा योग्य आणि सध्या वापरत असलेला ईमेल पत्ता भरा, ज्यावर अर्जाशी संबंधित अपडेट्स मिळू शकतात.";
+  }
+
+  return "Enter your correct and active email address in the Email Address field, as it may be used for application-related updates.";
+}
     
     // No service detected
     if (!service) {
