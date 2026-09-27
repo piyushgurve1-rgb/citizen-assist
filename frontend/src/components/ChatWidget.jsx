@@ -332,14 +332,26 @@ if (
   lowerMessage.includes("residential address")
 ) {
   if (isHindi) {
-    return "Address field में अपना वर्तमान पता भरें, जैसे घर का नंबर, गली, शहर, जिला और PIN code।";
+    return `${service.name} के लिए Address field में अपना सही और वर्तमान पता भरें।
+
+पता वही दर्ज करें जो आपके supporting address proof या official documents से match करता हो, जब ऐसा proof मांगा जाए।
+
+अपना address केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
   }
 
   if (isMarathi) {
-    return "Address field मध्ये तुमचा सध्याचा पत्ता भरा, जसे घर क्रमांक, रस्ता, शहर, जिल्हा आणि PIN code.";
+    return `${service.name} साठी Address field मध्ये तुमचा योग्य आणि सध्याचा पत्ता भरा.
+
+जेव्हा address proof मागितला जातो, तेव्हा supporting document किंवा official document शी जुळणारा पत्ता द्या.
+
+तुमचा address फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
   }
 
-  return "Enter your current address in the Address field, including your house number, street, city, district and PIN code.";
+  return `${service.name} may require your address.
+
+Enter your correct and current address in the Address field. When address proof is required, the address should match the supporting or official document.
+
+Enter your address only on an official and trusted government website or at an authorised service centre.`;
 }
 
 // PIN Code
