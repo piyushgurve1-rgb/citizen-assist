@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Navbar({ onOpenChat }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -48,6 +49,15 @@ function Navbar({ onOpenChat }) {
 
       {/* Right side */}
       <div className="navbar-right">
+
+        {/* Login */}
+        <button
+          type="button"
+          className="nav-login-button"
+          onClick={() => navigate("/login")}
+        >
+          Login
+        </button>
 
         {/* Notification */}
         <button
