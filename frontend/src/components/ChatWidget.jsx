@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { servicesData } from "../data/services";
 
-function ChatWidget({
+ function ChatWidget({
   isOpen,
   setIsOpen,
   selectedLanguage,
@@ -850,41 +850,65 @@ You can ask about this service's documents, steps or eligibility.`;
   // -----------------------------
   // Send Message
   // -----------------------------
-  const handleSend = () => {
-    addServiceContext();
+  const handleSend = async () => {
+  addServiceContext();
 
-    const userMessage = message.trim();
+  const userMessage = message.trim();
 
-    if (!userMessage) {
-      return;
-    }
+  if (!userMessage) {
+    return;
+  }
+
+  setMessages((current) => [
+    ...current,
+    {
+      sender: "user",
+      text: userMessage,
+      time: "Now",
+    },
+  ]);
+
+  setMessage("");
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: userMessage,
+      }),
+    });
+
+    const data = await response.json();
+
+    const reply = data.reply;
 
     setMessages((current) => [
       ...current,
       {
-        sender: "user",
-        text: userMessage,
+        sender: "ai",
+        text: reply,
         time: "Now",
       },
     ]);
 
-    setMessage("");
+    speakReply(reply);
+  } catch (error) {
+    console.error("Backend chat error:", error);
 
-    setTimeout(() => {
-      const reply = generateReply(userMessage);
-
-      setMessages((current) => [
-        ...current,
-        {
-          sender: "ai",
-          text: reply,
-          time: "Now",
-        },
-      ]);
-
-      speakReply(reply);
-    }, 400);
-  };
+    setMessages((current) => [
+      ...current,
+      {
+        sender: "ai",
+        text: "Sorry, backend se connection nahi ho pa raha hai.",
+        time: "Now",
+      },
+    ]);
+  }
+};
+   
 
   // -----------------------------
   // Quick Actions

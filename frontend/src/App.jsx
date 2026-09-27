@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -11,6 +11,16 @@ import ChatWidget from "./components/ChatWidget";
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  useEffect(() => {
+  fetch("http://127.0.0.1:8000/")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Backend connected:", data);
+    })
+    .catch((error) => {
+      console.error("Backend connection failed:", error);
+    });
+  }, []);
   const [selectedLanguage, setSelectedLanguage] = useState("en-IN");
   const [selectedService, setSelectedService] = useState(null);
   const [initialAction, setInitialAction] = useState(null);
