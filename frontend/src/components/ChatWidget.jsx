@@ -12,6 +12,7 @@ function ChatWidget({
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
+  const [currentChatService, setCurrentChatService] = useState(null);
 
   const recognitionRef = useRef(null);
 
@@ -62,8 +63,15 @@ function ChatWidget({
 
   const generateReply = (userMessage) => {
     const detectedService = findService(userMessage);
-    const service = selectedService || detectedService;
 
+    if (detectedService) {
+  setCurrentChatService(detectedService);
+   }
+
+    const service =
+    selectedService ||
+    currentChatService ||
+    detectedService;
     const text = userMessage.toLowerCase();
 
     const isHindi =
@@ -83,7 +91,11 @@ function ChatWidget({
 
       return "I can help with government services such as PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate and Scholarship. Please mention the service name.";
     }
-
+    const asksAddressProof =
+      text.includes("address proof") ||
+      text.includes("proof of address") ||
+      text.includes("address document") ||
+      text.includes("address documents");
     const asksDocuments =
       text.includes("document") ||
       text.includes("documents") ||
@@ -127,6 +139,29 @@ function ChatWidget({
       text.includes("कोण पात्र") ||
       text.includes("पात्र कोण");
 
+      if (asksAddressProof) {
+  if (isHindi) {
+    return `${service.name} के लिए Address Proof एक जरूरी दस्तावेज़ हो सकता है।
+
+आमतौर पर स्वीकार किए जाने वाले address proof में Aadhaar Card, Voter ID, Driving Licence, बिजली/पानी का बिल या अन्य मान्य address document शामिल हो सकते हैं।
+
+आवेदन के प्रकार के अनुसार आवश्यक दस्तावेज़ अलग हो सकते हैं।`;
+  }
+
+  if (isMarathi) {
+    return `${service.name} साठी Address Proof हे आवश्यक कागदपत्र असू शकते.
+
+सामान्यतः Aadhaar Card, Voter ID, Driving Licence, वीज किंवा पाण्याचे बिल किंवा इतर वैध address document स्वीकारले जाऊ शकतात.
+
+अर्जाच्या प्रकारानुसार आवश्यक कागदपत्रे वेगवेगळी असू शकतात.`;
+  }
+
+  return `${service.name} may require a valid proof of address.
+
+Common examples can include Aadhaar Card, Voter ID, Driving Licence, electricity/water bill or another valid address document.
+
+The exact required document can vary depending on the application type.`;
+}
     if (asksDocuments) {
       if (isHindi) {
         return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
