@@ -224,6 +224,21 @@ if (
 
   return "Enter your correct and active email address in the Email Address field, as it may be used for application-related updates.";
 }
+if (
+  lowerMessage.includes("address") ||
+  lowerMessage.includes("home address") ||
+  lowerMessage.includes("residential address")
+) {
+  if (isHindi) {
+    return "Address field में अपना वर्तमान पता भरें, जैसे घर का नंबर, गली, शहर, जिला और PIN code।";
+  }
+
+  if (isMarathi) {
+    return "Address field मध्ये तुमचा सध्याचा पत्ता भरा, जसे घर क्रमांक, रस्ता, शहर, जिल्हा आणि PIN code.";
+  }
+
+  return "Enter your current address in the Address field, including your house number, street, city, district and PIN code.";
+}
     
     // No service detected
     if (!service) {
