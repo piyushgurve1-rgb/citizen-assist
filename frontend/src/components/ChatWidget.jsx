@@ -154,9 +154,9 @@ function ChatWidget({
     }
 
     const service =
-     detectedService ||
-     selectedService ||
-     currentChatService;
+  selectedService ||
+  currentChatService ||
+  detectedService;
      const lowerMessage = userMessage.toLowerCase();
      const text = userMessage.toLowerCase();
 
