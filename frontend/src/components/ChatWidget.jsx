@@ -285,6 +285,21 @@ if (
 
   return "Select your correct gender in the Gender field, such as Male, Female, or another available option.";
 }
+if (
+  lowerMessage.includes("pan number") ||
+  lowerMessage.includes("pan no") ||
+  lowerMessage.includes("pan card number")
+) {
+  if (isHindi) {
+    return "PAN Number field में अपना सही PAN number भरें, जैसा कि आपके PAN card पर दर्ज है।";
+  }
+
+  if (isMarathi) {
+    return "PAN Number field मध्ये तुमचा योग्य PAN number भरा, जसा तुमच्या PAN card वर नमूद आहे.";
+  }
+
+  return "Enter your correct PAN number in the PAN Number field, exactly as shown on your PAN card.";
+}
     // No service detected
     if (!service) {
       if (isHindi) {
