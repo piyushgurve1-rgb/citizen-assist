@@ -503,6 +503,36 @@ The exact required document can vary depending on the application type.`;
     // -----------------------------
     // Documents Reply
     // -----------------------------
+    // -----------------------------
+// Specific Document Explanation
+// -----------------------------
+const asksAadhaar =
+  text.includes("aadhaar") ||
+  text.includes("aadhar");
+
+if (asksAadhaar) {
+  if (isHindi) {
+    return `${service.name} के लिए Aadhaar का उपयोग पहचान सत्यापन के लिए किया जा सकता है।
+
+Aadhaar number या Aadhaar card की आवश्यकता सेवा के अनुसार अलग हो सकती है।
+
+अपना Aadhaar number केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
+  }
+
+  if (isMarathi) {
+    return `${service.name} साठी Aadhaar चा वापर ओळख पडताळणीसाठी केला जाऊ शकतो.
+
+Aadhaar number किंवा Aadhaar card ची आवश्यकता सेवेनुसार वेगवेगळी असू शकते.
+
+तुमचा Aadhaar number फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
+  }
+
+  return `${service.name} may use Aadhaar for identity verification.
+
+The requirement for an Aadhaar number or Aadhaar card can vary depending on the service.
+
+Enter your Aadhaar number only on an official and trusted government website or at an authorised service centre.`;
+}
     if (asksDocuments) {
       if (isHindi) {
         return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
