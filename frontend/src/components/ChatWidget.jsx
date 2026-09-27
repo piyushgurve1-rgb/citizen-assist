@@ -13,6 +13,7 @@ function ChatWidget({
   const [isListening, setIsListening] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
   const [currentChatService, setCurrentChatService] = useState(null);
+  const [chatServiceOverride, setChatServiceOverride] = useState(null);
 
   const recognitionRef = useRef(null);
 
@@ -154,9 +155,9 @@ function ChatWidget({
     }
 
     const service =
-  selectedService ||
-  currentChatService ||
-  detectedService;
+      chatServiceOverride
+        ? detectedService || null
+        : selectedService || currentChatService || detectedService;
      const lowerMessage = userMessage.toLowerCase();
      const text = userMessage.toLowerCase();
 
@@ -733,6 +734,20 @@ You can ask about this service's documents, steps or eligibility.`;
 
       reply = generateReply("steps");
     }
+    if (action === "new-service") {
+       setCurrentChatService(null);
+       setChatServiceOverride(true);
+       setMessages((current) => [
+       ...current,
+    {
+      sender: "ai",
+      text: "Sure! Which government service would you like help with next?",
+      time: "Now",
+    },
+  ]);
+
+  return;
+}
 
     if (action === "official") {
       if (
@@ -930,6 +945,10 @@ You can ask about this service's documents, steps or eligibility.`;
         {
           label: "🔗 Official Website",
           action: "official",
+        },
+        {
+         label: "🔄 New Service",
+         action: "new-service",
         },
       ]
     : [
