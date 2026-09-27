@@ -565,6 +565,38 @@ You may need to provide the correct bank account number and other bank-related i
 
 Enter your bank details only on an official and trusted government website or at an authorised service centre.`;
 }
+  // -----------------------------
+// Mobile Number Explanation
+// -----------------------------
+const asksMobileNumber =
+  text.includes("mobile number") ||
+  text.includes("mobile no") ||
+  text.includes("phone number") ||
+  text.includes("contact number");
+
+if (asksMobileNumber) {
+  if (isHindi) {
+    return `${service.name} के लिए Mobile Number की आवश्यकता हो सकती है।
+
+सही और चालू mobile number देना जरूरी हो सकता है, क्योंकि इसका उपयोग OTP, verification या application updates के लिए किया जा सकता है।
+
+अपना mobile number केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
+  }
+
+  if (isMarathi) {
+    return `${service.name} साठी Mobile Number आवश्यक असू शकतो.
+
+योग्य आणि चालू mobile number देणे आवश्यक असू शकते, कारण त्याचा वापर OTP, verification किंवा application updates साठी केला जाऊ शकतो.
+
+तुमचा mobile number फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
+  }
+
+  return `${service.name} may require a mobile number.
+
+A valid and active mobile number may be needed for OTP, verification or application updates.
+
+Enter your mobile number only on an official and trusted government website or at an authorised service centre.`;
+}
     if (asksDocuments) {
       if (isHindi) {
         return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
