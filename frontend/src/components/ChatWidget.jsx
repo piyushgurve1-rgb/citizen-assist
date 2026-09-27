@@ -851,6 +851,8 @@ You can ask about this service's documents, steps or eligibility.`;
   // Send Message
   // -----------------------------
   const handleSend = async () => {
+  console.log("SEND CLICKED");
+
   addServiceContext();
 
   const userMessage = message.trim();
@@ -858,6 +860,17 @@ You can ask about this service's documents, steps or eligibility.`;
   if (!userMessage) {
     return;
   }
+
+  const detectedService = findService(userMessage);
+
+  if (detectedService) {
+    setCurrentChatService(detectedService);
+  }
+
+  const serviceForMessage =
+    selectedService ||
+    detectedService ||
+    currentChatService;
 
   setMessages((current) => [
     ...current,
@@ -871,18 +884,19 @@ You can ask about this service's documents, steps or eligibility.`;
   setMessage("");
 
   try {
-  const response = await fetch("http://127.0.0.1:8000/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: userMessage,
-      language: selectedLanguage,
-    }),
-  });
+    const response = await fetch("http://127.0.0.1:8000/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        language: selectedLanguage,
+        service: serviceForMessage?.name || null,
+      }),
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
     const reply = data.reply;
 
@@ -909,8 +923,6 @@ You can ask about this service's documents, steps or eligibility.`;
     ]);
   }
 };
-   
-
   // -----------------------------
   // Quick Actions
   // -----------------------------
