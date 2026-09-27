@@ -163,6 +163,32 @@ function ChatWidget({
 const isHindi = selectedLanguage === "hi-IN";
 const isMarathi = selectedLanguage === "mr-IN";
 
+// -----------------------------
+// Form Field Explanation
+// -----------------------------
+
+// PAN format
+if (
+  lowerMessage.includes("pan number kitne") ||
+  lowerMessage.includes("pan kitne") ||
+  lowerMessage.includes("pan format") ||
+  lowerMessage.includes("pan characters") ||
+  lowerMessage.includes("pan digits") ||
+  lowerMessage.includes("pan कितने") ||
+  lowerMessage.includes("pan कितने characters")
+) {
+  if (isHindi) {
+    return "PAN number आमतौर पर 10 characters का होता है, जिसमें letters और numbers शामिल होते हैं।";
+  }
+
+  if (isMarathi) {
+    return "PAN number साधारणपणे 10 characters चा असतो, ज्यामध्ये letters आणि numbers असतात.";
+  }
+
+  return "A PAN number is generally 10 characters long and contains both letters and numbers.";
+}
+
+// Father's Name
 if (
   lowerMessage.includes("father name") ||
   lowerMessage.includes("father's name") ||
@@ -178,6 +204,8 @@ if (
 
   return "Enter your father's full name in the Father's Name field, exactly as written on your official document.";
 }
+
+// Date of Birth
 if (
   lowerMessage.includes("date of birth") ||
   lowerMessage.includes("dob") ||
@@ -193,6 +221,8 @@ if (
 
   return "Enter your date of birth in the Date of Birth field, exactly as written on your official document.";
 }
+
+// Mobile Number
 if (
   lowerMessage.includes("mobile number") ||
   lowerMessage.includes("mobile no") ||
@@ -209,6 +239,8 @@ if (
 
   return "Enter your active mobile number in the Mobile Number field, as it may be used for OTPs or application-related updates.";
 }
+
+// Email
 if (
   lowerMessage.includes("email address") ||
   lowerMessage.includes("email id") ||
@@ -224,6 +256,8 @@ if (
 
   return "Enter your correct and active email address in the Email Address field, as it may be used for application-related updates.";
 }
+
+// Address
 if (
   lowerMessage.includes("address") ||
   lowerMessage.includes("home address") ||
@@ -239,7 +273,9 @@ if (
 
   return "Enter your current address in the Address field, including your house number, street, city, district and PIN code.";
 }
-    if (
+
+// PIN Code
+if (
   lowerMessage.includes("pin code") ||
   lowerMessage.includes("pincode") ||
   lowerMessage.includes("postal code")
@@ -254,6 +290,8 @@ if (
 
   return "Enter the correct 6-digit PIN code for your address in the PIN Code field.";
 }
+
+// Aadhaar
 if (
   lowerMessage.includes("aadhaar number") ||
   lowerMessage.includes("aadhar number") ||
@@ -270,6 +308,8 @@ if (
 
   return "Enter your correct 12-digit Aadhaar number in the Aadhaar Number field. Enter it only on an official and trusted government website.";
 }
+
+// Gender
 if (
   lowerMessage.includes("gender") ||
   lowerMessage.includes("male or female") ||
@@ -285,6 +325,8 @@ if (
 
   return "Select your correct gender in the Gender field, such as Male, Female, or another available option.";
 }
+
+// PAN Number
 if (
   lowerMessage.includes("pan number") ||
   lowerMessage.includes("pan no") ||
