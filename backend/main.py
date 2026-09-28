@@ -722,6 +722,27 @@ def chat(request: ChatRequest):
 
     message = request.message.strip().lower()
     language = request.language
+    # Hindi / Marathi voice intent normalization
+    message = (
+        message
+        .replace("स्टेप्स", "steps")
+        .replace("स्टेप", "step")
+        .replace("प्रक्रिया", "process")
+        .replace("आवेदन कैसे करें", "how apply")
+        .replace("कैसे आवेदन करें", "how apply")
+        .replace("कैसे करें", "how")
+        .replace("कैसे", "how")
+        .replace("दस्तावेज़", "documents")
+        .replace("दस्तावेज", "documents")
+        .replace("कागज़", "documents")
+        .replace("कागज", "documents")
+        .replace("पात्रता", "eligibility")
+        .replace("पात्र", "eligible")
+        .replace("कागदपत्रे", "documents")
+        .replace("कागदपत्र", "documents")
+        .replace("कसे करायचे", "how")
+        .replace("कसे", "how")
+    )
 
     if request.service:
         message = request.service.lower() + " " + message
