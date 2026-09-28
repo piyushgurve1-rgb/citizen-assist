@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { servicesData } from "../data/services";
 
- function ChatWidget({
+function ChatWidget({
   isOpen,
   setIsOpen,
   selectedLanguage,
@@ -25,19 +25,6 @@ import { servicesData } from "../data/services";
       time: "Now",
     },
   ]);
-  const resetChat = () => {
-  setMessages([
-    {
-      sender: "ai",
-      text:
-        "Hello! 👋 I am CitizenAssist. Ask me about government services, documents, eligibility or application steps.",
-      time: "Now",
-    },
-  ]);
-
-  setCurrentChatService(null);
-  setChatServiceOverride(null);
-};
 
   const languages = [
     { code: "en-IN", name: "English" },
@@ -51,8 +38,28 @@ import { servicesData } from "../data/services";
     )?.name || "English";
 
   // -----------------------------
+  // Reset Chat
+  // -----------------------------
+
+  const resetChat = () => {
+    setMessages([
+      {
+        sender: "ai",
+        text:
+          "Hello! 👋 I am CitizenAssist. Ask me about government services, documents, eligibility or application steps.",
+        time: "Now",
+      },
+    ]);
+
+    setCurrentChatService(null);
+    setChatServiceOverride(null);
+    setMessage("");
+  };
+
+  // -----------------------------
   // Voice Output
   // -----------------------------
+
   const speakReply = (text) => {
     if (!("speechSynthesis" in window)) {
       return;
@@ -70,359 +77,413 @@ import { servicesData } from "../data/services";
   };
 
   // -----------------------------
-  // Find Government Service
+  // Edit Distance
   // -----------------------------
+
   const getEditDistance = (a, b) => {
-  const matrix = [];
+    const matrix = [];
 
-  for (let i = 0; i <= b.length; i++) {
-    matrix[i] = [i];
-  }
+    for (let i = 0; i <= b.length; i++) {
+      matrix[i] = [i];
+    }
 
-  for (let j = 0; j <= a.length; j++) {
-    matrix[0][j] = j;
-  }
+    for (let j = 0; j <= a.length; j++) {
+      matrix[0][j] = j;
+    }
 
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] + 1
-        );
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + 1
+          );
+        }
       }
     }
-  }
 
-  return matrix[b.length][a.length];
-};
+    return matrix[b.length][a.length];
+  };
+
+  // -----------------------------
+  // Find Government Service
+  // -----------------------------
 
   const findService = (userMessage) => {
-  const text = userMessage
-  .toLowerCase()
-  .replace(/[-_]/g, " ")
-  .replace(/\s+/g, " ")
-  .trim();
-  const userWords = text
-    .split(/\s+/)
-    .filter((word) => word.length >= 3);
-    const serviceIntentWords = [
-  "document",
-  "documents",
-  "eligibility",
-  "eligible",
-  "elgibility",
-  "steps",
-  "step",
-  "process",
-  "apply",
-  "application",
-  "how",
-  "kaise",
-  "proof",
-];
-const serviceSearchWords = userWords.filter(
-  (word) => !serviceIntentWords.includes(word)
-);
+    const text = userMessage
+      .toLowerCase()
+      .replace(/[-_]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
-  const services = Object.values(servicesData);
-  const exactService = services.find((service) => {
-  const name = service.name
-  .toLowerCase()
-  .replace(/[-_]/g, " ")
-  .replace(/\s+/g, " ")
-  .trim();
+    if (!text) {
+      return null;
+    }
 
-  return (
-    text === name ||
-    text.includes(name) ||
-    name.includes(text)
-  );
-});
-
-if (exactService) {
-  return exactService;
-}
-
-  let bestService = null;
-  let bestScore = 0;
-
-  services.forEach((service) => {
-    const searchableText = [
-      service.name,
-      service.category,
-      service.description,
-      service.overview,
-      ...(service.keywords || []),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    const serviceWords = searchableText
+    const userWords = text
       .split(/\s+/)
       .filter((word) => word.length >= 3);
 
-    let serviceScore = 0;
+    const serviceIntentWords = [
+      "document",
+      "documents",
+      "eligibility",
+      "eligible",
+      "elgibility",
+      "steps",
+      "step",
+      "process",
+      "apply",
+      "application",
+      "how",
+      "kaise",
+      "proof",
+    ];
 
-    serviceSearchWords.forEach((userWord) => {
-      serviceWords.forEach((serviceWord) => {
-        if (userWord === serviceWord) {
-          serviceScore += 3;
-        } else if (
-          userWord.includes(serviceWord) ||
-          serviceWord.includes(userWord)
-        ) {
-          serviceScore += 2;
-        } else if (
-          serviceWord.length >= 5 &&
-          getEditDistance(userWord, serviceWord) <= 2
-        ) {
-          serviceScore += 1;
-        }
-      });
+    const serviceSearchWords = userWords.filter(
+      (word) => !serviceIntentWords.includes(word)
+    );
+
+    const services = Object.values(servicesData);
+
+    // Exact service match
+    const exactService = services.find((service) => {
+      const name = service.name
+        .toLowerCase()
+        .replace(/[-_]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      return (
+        text === name ||
+        text.includes(name) ||
+        name.includes(text)
+      );
     });
 
-    if (serviceScore > bestScore) {
-      bestScore = serviceScore;
-      bestService = service;
+    if (exactService) {
+      return exactService;
     }
-  });
 
-  return bestService;
-};
+    let bestService = null;
+    let bestScore = 0;
+
+    services.forEach((service) => {
+      const searchableText = [
+        service.name,
+        service.category,
+        service.description,
+        service.overview,
+        ...(service.keywords || []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const serviceWords = searchableText
+        .split(/\s+/)
+        .filter((word) => word.length >= 3);
+
+      let serviceScore = 0;
+
+      serviceSearchWords.forEach((userWord) => {
+        serviceWords.forEach((serviceWord) => {
+          if (userWord === serviceWord) {
+            serviceScore += 3;
+          } else if (
+            userWord.includes(serviceWord) ||
+            serviceWord.includes(userWord)
+          ) {
+            serviceScore += 2;
+          } else if (
+            serviceWord.length >= 5 &&
+            getEditDistance(userWord, serviceWord) <= 2
+          ) {
+            serviceScore += 1;
+          }
+        });
+      });
+
+      if (serviceScore > bestScore) {
+        bestScore = serviceScore;
+        bestService = service;
+      }
+    });
+
+    return bestService;
+  };
 
   // -----------------------------
-  // Generate AI-style Reply
+  // Generate Local Reply
   // -----------------------------
+
   const generateReply = (userMessage) => {
     const detectedService = findService(userMessage);
-    const hasServiceName = detectedService !== null;
 
     if (detectedService) {
       setCurrentChatService(detectedService);
     }
 
     const service =
-  selectedService ||
-  detectedService ||
-  currentChatService;
-     const lowerMessage = userMessage.toLowerCase();
-     const text = userMessage
-  .toLowerCase()
-  .replace(/[-_]/g, " ")
-  .replace(/\s+/g, " ")
-  .trim();
-const isHindi = selectedLanguage === "hi-IN";
-const isMarathi = selectedLanguage === "mr-IN";
+      selectedService ||
+      detectedService ||
+      currentChatService;
 
-// -----------------------------
-// Form Field Explanation
-// -----------------------------
+    const lowerMessage = userMessage.toLowerCase();
 
-// PAN format
-if (
-  lowerMessage.includes("pan number kitne") ||
-  lowerMessage.includes("pan kitne") ||
-  lowerMessage.includes("pan format") ||
-  lowerMessage.includes("pan characters") ||
-  lowerMessage.includes("pan digits") ||
-  lowerMessage.includes("pan कितने") ||
-  lowerMessage.includes("pan कितने characters")
-) {
-  if (isHindi) {
-    return "PAN number आमतौर पर 10 characters का होता है, जिसमें letters और numbers शामिल होते हैं।";
-  }
+    const text = userMessage
+      .toLowerCase()
+      .replace(/[-_]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
-  if (isMarathi) {
-    return "PAN number साधारणपणे 10 characters चा असतो, ज्यामध्ये letters आणि numbers असतात.";
-  }
+    const isHindi = selectedLanguage === "hi-IN";
+    const isMarathi = selectedLanguage === "mr-IN";
 
-  return "A PAN number is generally 10 characters long and contains both letters and numbers.";
-}
+    /*
+     * Important:
+     * Some questions can come without a selected service.
+     * Therefore we should not access service.name directly.
+     */
+    const serviceName = service?.name || "This service";
 
-// Father's Name
-if (
-  lowerMessage.includes("father name") ||
-  lowerMessage.includes("father's name") ||
-  lowerMessage.includes("father")
-) {
-  if (isHindi) {
-    return "Father's Name field में अपने पिता का पूरा नाम भरें, जैसा कि आपके official document में लिखा है।";
-  }
+    // -----------------------------
+    // PAN Format
+    // -----------------------------
 
-  if (isMarathi) {
-    return "Father's Name field मध्ये तुमच्या वडिलांचे पूर्ण नाव भरा, जसे तुमच्या official document मध्ये लिहिले आहे.";
-  }
+    if (
+      lowerMessage.includes("pan number kitne") ||
+      lowerMessage.includes("pan kitne") ||
+      lowerMessage.includes("pan format") ||
+      lowerMessage.includes("pan characters") ||
+      lowerMessage.includes("pan digits") ||
+      lowerMessage.includes("pan कितने") ||
+      lowerMessage.includes("pan कितने characters")
+    ) {
+      if (isHindi) {
+        return "PAN number आमतौर पर 10 characters का होता है, जिसमें letters और numbers शामिल होते हैं।";
+      }
 
-  return "Enter your father's full name in the Father's Name field, exactly as written on your official document.";
-}
+      if (isMarathi) {
+        return "PAN number साधारणपणे 10 characters चा असतो, ज्यामध्ये letters आणि numbers असतात.";
+      }
 
-// Date of Birth
-if (
-  lowerMessage.includes("date of birth") ||
-  lowerMessage.includes("dob") ||
-  lowerMessage.includes("birth date")
-) {
-  if (isHindi) {
-    return "Date of Birth field में अपनी जन्मतिथि भरें, जैसा कि आपके official document में दर्ज है।";
-  }
+      return "A PAN number is generally 10 characters long and contains both letters and numbers.";
+    }
 
-  if (isMarathi) {
-    return "Date of Birth field मध्ये तुमची जन्मतारीख भरा, जशी तुमच्या official document मध्ये नमूद आहे.";
-  }
+    // -----------------------------
+    // Father's Name
+    // -----------------------------
 
-  return "Enter your date of birth in the Date of Birth field, exactly as written on your official document.";
-}
+    if (
+      lowerMessage.includes("father name") ||
+      lowerMessage.includes("father's name") ||
+      lowerMessage.includes("father")
+    ) {
+      if (isHindi) {
+        return "Father's Name field में अपने पिता का पूरा नाम भरें, जैसा कि आपके official document में लिखा है।";
+      }
 
-// Mobile Number
-if (
-  lowerMessage.includes("mobile number") ||
-  lowerMessage.includes("mobile no") ||
-  lowerMessage.includes("phone number") ||
-  lowerMessage.includes("phone no")
-) {
-  if (isHindi) {
-    return "Mobile Number field में अपना चालू मोबाइल नंबर भरें, जिस पर OTP या application-related updates प्राप्त हो सकें।";
-  }
+      if (isMarathi) {
+        return "Father's Name field मध्ये तुमच्या वडिलांचे पूर्ण नाव भरा, जसे तुमच्या official document मध्ये लिहिले आहे.";
+      }
 
-  if (isMarathi) {
-    return "Mobile Number field मध्ये तुमचा सध्या वापरत असलेला मोबाइल नंबर भरा, ज्यावर OTP किंवा अर्जाशी संबंधित अपडेट्स मिळू शकतात.";
-  }
+      return "Enter your father's full name in the Father's Name field, exactly as written on your official document.";
+    }
 
-  return "Enter your active mobile number in the Mobile Number field, as it may be used for OTPs or application-related updates.";
-}
+    // -----------------------------
+    // Date of Birth
+    // -----------------------------
 
-// Email
-if (
-  lowerMessage.includes("email address") ||
-  lowerMessage.includes("email id") ||
-  lowerMessage.includes("email")
-) {
-  if (isHindi) {
-    return `${service.name} के लिए Email Address की आवश्यकता हो सकती है।
+    if (
+      lowerMessage.includes("date of birth") ||
+      lowerMessage.includes("dob") ||
+      lowerMessage.includes("birth date")
+    ) {
+      if (isHindi) {
+        return "Date of Birth field में अपनी जन्मतिथि भरें, जैसा कि आपके official document में दर्ज है।";
+      }
+
+      if (isMarathi) {
+        return "Date of Birth field मध्ये तुमची जन्मतारीख भरा, जशी तुमच्या official document मध्ये नमूद आहे.";
+      }
+
+      return "Enter your date of birth in the Date of Birth field, exactly as written on your official document.";
+    }
+
+    // -----------------------------
+    // Mobile Number
+    // -----------------------------
+
+    if (
+      lowerMessage.includes("mobile number") ||
+      lowerMessage.includes("mobile no") ||
+      lowerMessage.includes("phone number") ||
+      lowerMessage.includes("phone no")
+    ) {
+      if (isHindi) {
+        return "Mobile Number field में अपना चालू मोबाइल नंबर भरें, जिस पर OTP या application-related updates प्राप्त हो सकें।";
+      }
+
+      if (isMarathi) {
+        return "Mobile Number field मध्ये तुमचा सध्या वापरत असलेला मोबाइल नंबर भरा, ज्यावर OTP किंवा अर्जाशी संबंधित अपडेट्स मिळू शकतात.";
+      }
+
+      return "Enter your active mobile number in the Mobile Number field, as it may be used for OTPs or application-related updates.";
+    }
+
+    // -----------------------------
+    // Email
+    // -----------------------------
+
+    if (
+      lowerMessage.includes("email address") ||
+      lowerMessage.includes("email id") ||
+      lowerMessage.includes("email")
+    ) {
+      if (isHindi) {
+        return `${serviceName} के लिए Email Address की आवश्यकता हो सकती है।
 
 सही और active email address देना जरूरी हो सकता है, क्योंकि इसका उपयोग application updates, communication या verification के लिए किया जा सकता है।
 
 अपना email address केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
-  }
+      }
 
-  if (isMarathi) {
-    return `${service.name} साठी Email Address आवश्यक असू शकतो.
+      if (isMarathi) {
+        return `${serviceName} साठी Email Address आवश्यक असू शकतो.
 
 योग्य आणि active email address देणे आवश्यक असू शकते, कारण त्याचा वापर application updates, communication किंवा verification साठी केला जाऊ शकतो.
 
 तुमचा email address फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
-  }
+      }
 
-  return `${service.name} may require an email address.
+      return `${serviceName} may require an email address.
 
 A valid and active email address may be needed for application updates, communication or verification.
 
 Enter your email address only on an official and trusted government website or at an authorised service centre.`;
-}
+    }
 
-// Address
-if (
-  lowerMessage.includes("address") ||
-  lowerMessage.includes("home address") ||
-  lowerMessage.includes("residential address")
-) {
-  if (isHindi) {
-    return `${service.name} के लिए Address field में अपना सही और वर्तमान पता भरें।
+    // -----------------------------
+    // Address
+    // -----------------------------
+
+    if (
+      lowerMessage.includes("address") ||
+      lowerMessage.includes("home address") ||
+      lowerMessage.includes("residential address")
+    ) {
+      if (isHindi) {
+        return `${serviceName} के लिए Address field में अपना सही और वर्तमान पता भरें।
 
 पता वही दर्ज करें जो आपके supporting address proof या official documents से match करता हो, जब ऐसा proof मांगा जाए।
 
 अपना address केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
-  }
+      }
 
-  if (isMarathi) {
-    return `${service.name} साठी Address field मध्ये तुमचा योग्य आणि सध्याचा पत्ता भरा.
+      if (isMarathi) {
+        return `${serviceName} साठी Address field मध्ये तुमचा योग्य आणि सध्याचा पत्ता भरा.
 
 जेव्हा address proof मागितला जातो, तेव्हा supporting document किंवा official document शी जुळणारा पत्ता द्या.
 
 तुमचा address फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
-  }
+      }
 
-  return `${service.name} may require your address.
+      return `${serviceName} may require your address.
 
 Enter your correct and current address in the Address field. When address proof is required, the address should match the supporting or official document.
 
 Enter your address only on an official and trusted government website or at an authorised service centre.`;
-}
+    }
 
-// PIN Code
-if (
-  lowerMessage.includes("pin code") ||
-  lowerMessage.includes("pincode") ||
-  lowerMessage.includes("postal code")
-) {
-  if (isHindi) {
-    return "PIN Code field में अपने पते का सही 6-digit PIN code भरें।";
-  }
+    // -----------------------------
+    // PIN Code
+    // -----------------------------
 
-  if (isMarathi) {
-    return "PIN Code field मध्ये तुमच्या पत्त्याचा योग्य 6 अंकी PIN code भरा.";
-  }
+    if (
+      lowerMessage.includes("pin code") ||
+      lowerMessage.includes("pincode") ||
+      lowerMessage.includes("postal code")
+    ) {
+      if (isHindi) {
+        return "PIN Code field में अपने पते का सही 6-digit PIN code भरें।";
+      }
 
-  return "Enter the correct 6-digit PIN code for your address in the PIN Code field.";
-}
+      if (isMarathi) {
+        return "PIN Code field मध्ये तुमच्या पत्त्याचा योग्य 6 अंकी PIN code भरा.";
+      }
 
-// Aadhaar
-if (
-  lowerMessage.includes("aadhaar number") ||
-  lowerMessage.includes("aadhar number") ||
-  lowerMessage.includes("aadhaar no") ||
-  lowerMessage.includes("aadhar no")
-) {
-  if (isHindi) {
-    return "Aadhaar Number field में अपना सही 12-digit Aadhaar number भरें। इसे केवल official और trusted government website पर ही दर्ज करें।";
-  }
+      return "Enter the correct 6-digit PIN code for your address in the PIN Code field.";
+    }
 
-  if (isMarathi) {
-    return "Aadhaar Number field मध्ये तुमचा योग्य 12 अंकी Aadhaar number भरा. तो फक्त official आणि trusted government website वरच टाका.";
-  }
+    // -----------------------------
+    // Aadhaar
+    // -----------------------------
 
-  return "Enter your correct 12-digit Aadhaar number in the Aadhaar Number field. Enter it only on an official and trusted government website.";
-}
+    if (
+      lowerMessage.includes("aadhaar number") ||
+      lowerMessage.includes("aadhar number") ||
+      lowerMessage.includes("aadhaar no") ||
+      lowerMessage.includes("aadhar no")
+    ) {
+      if (isHindi) {
+        return "Aadhaar Number field में अपना सही 12-digit Aadhaar number भरें। इसे केवल official और trusted government website पर ही दर्ज करें।";
+      }
 
-// Gender
-if (
-  lowerMessage.includes("gender") ||
-  lowerMessage.includes("male or female") ||
-  lowerMessage.includes("sex")
-) {
-  if (isHindi) {
-    return "Gender field में अपना सही gender चुनें, जैसे Male, Female या उपलब्ध अन्य option।";
-  }
+      if (isMarathi) {
+        return "Aadhaar Number field मध्ये तुमचा योग्य 12 अंकी Aadhaar number भरा. तो फक्त official आणि trusted government website वरच टाका.";
+      }
 
-  if (isMarathi) {
-    return "Gender field मध्ये तुमचे योग्य gender निवडा, जसे Male, Female किंवा उपलब्ध असलेला इतर option.";
-  }
+      return "Enter your correct 12-digit Aadhaar number in the Aadhaar Number field. Enter it only on an official and trusted government website.";
+    }
 
-  return "Select your correct gender in the Gender field, such as Male, Female, or another available option.";
-}
+    // -----------------------------
+    // Gender
+    // -----------------------------
 
-// PAN Number
-if (
-  lowerMessage.includes("pan number") ||
-  lowerMessage.includes("pan no") ||
-  lowerMessage.includes("pan card number")
-) {
-  if (isHindi) {
-    return "PAN Number field में अपना सही PAN number भरें, जैसा कि आपके PAN card पर दर्ज है।";
-  }
+    if (
+      lowerMessage.includes("gender") ||
+      lowerMessage.includes("male or female") ||
+      lowerMessage.includes("sex")
+    ) {
+      if (isHindi) {
+        return "Gender field में अपना सही gender चुनें, जैसे Male, Female या उपलब्ध अन्य option।";
+      }
 
-  if (isMarathi) {
-    return "PAN Number field मध्ये तुमचा योग्य PAN number भरा, जसा तुमच्या PAN card वर नमूद आहे.";
-  }
+      if (isMarathi) {
+        return "Gender field मध्ये तुमचे योग्य gender निवडा, जसे Male, Female किंवा उपलब्ध असलेला इतर option.";
+      }
 
-  return "Enter your correct PAN number in the PAN Number field, exactly as shown on your PAN card.";
-}
-    // No service detected
+      return "Select your correct gender in the Gender field, such as Male, Female, or another available option.";
+    }
+
+    // -----------------------------
+    // PAN Number
+    // -----------------------------
+
+    if (
+      lowerMessage.includes("pan number") ||
+      lowerMessage.includes("pan no") ||
+      lowerMessage.includes("pan card number")
+    ) {
+      if (isHindi) {
+        return "PAN Number field में अपना सही PAN number भरें, जैसा कि आपके PAN card पर दर्ज है।";
+      }
+
+      if (isMarathi) {
+        return "PAN Number field मध्ये तुमचा योग्य PAN number भरा, जसा तुमच्या PAN card वर नमूद आहे.";
+      }
+
+      return "Enter your correct PAN number in the PAN Number field, exactly as shown on your PAN card.";
+    }
+
+    // -----------------------------
+    // No Service
+    // -----------------------------
+
     if (!service) {
       if (isHindi) {
         return "मैं PM-KISAN, Ayushman Bharat, Passport, Driving Licence, Income Certificate और Scholarship जैसी सरकारी सेवाओं में मदद कर सकता हूँ। कृपया सेवा का नाम बताएं।";
@@ -438,15 +499,141 @@ if (
     // -----------------------------
     // Address Proof
     // -----------------------------
+
     const asksAddressProof =
       text.includes("address proof") ||
       text.includes("proof of address") ||
       text.includes("address document") ||
       text.includes("address documents");
 
+    if (asksAddressProof) {
+      if (isHindi) {
+        return `${serviceName} के लिए Address Proof एक जरूरी दस्तावेज़ हो सकता है।
+
+आमतौर पर स्वीकार किए जाने वाले address proof में Aadhaar Card, Voter ID, Driving Licence, बिजली/पानी का बिल या अन्य मान्य address document शामिल हो सकते हैं।
+
+आवेदन के प्रकार के अनुसार आवश्यक दस्तावेज़ अलग हो सकते हैं।`;
+      }
+
+      if (isMarathi) {
+        return `${serviceName} साठी Address Proof हे आवश्यक कागदपत्र असू शकते.
+
+सामान्यतः Aadhaar Card, Voter ID, Driving Licence, वीज किंवा पाण्याचे बिल किंवा इतर वैध address document स्वीकारले जाऊ शकतात.
+
+अर्जाच्या प्रकारानुसार आवश्यक कागदपत्रे वेगवेगळी असू शकतात.`;
+      }
+
+      return `${serviceName} may require a valid proof of address.
+
+Common examples can include Aadhaar Card, Voter ID, Driving Licence, electricity/water bill or another valid address document.
+
+The exact required document can vary depending on the application type.`;
+    }
+
+    // -----------------------------
+    // Aadhaar Explanation
+    // -----------------------------
+
+    const asksAadhaar =
+      text.includes("aadhaar") ||
+      text.includes("aadhar");
+
+    if (asksAadhaar) {
+      if (isHindi) {
+        return `${serviceName} के लिए Aadhaar का उपयोग पहचान सत्यापन के लिए किया जा सकता है।
+
+Aadhaar number या Aadhaar card की आवश्यकता सेवा के अनुसार अलग हो सकती है।
+
+अपना Aadhaar number केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
+      }
+
+      if (isMarathi) {
+        return `${serviceName} साठी Aadhaar चा वापर ओळख पडताळणीसाठी केला जाऊ शकतो.
+
+Aadhaar number किंवा Aadhaar card ची आवश्यकता सेवेनुसार वेगवेगळी असू शकते.
+
+तुमचा Aadhaar number फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
+      }
+
+      return `${serviceName} may use Aadhaar for identity verification.
+
+The requirement for an Aadhaar number or Aadhaar card can vary depending on the service.
+
+Enter your Aadhaar number only on an official and trusted government website or at an authorised service centre.`;
+    }
+
+    // -----------------------------
+    // Bank Account
+    // -----------------------------
+
+    const asksBankAccount =
+      text.includes("bank account") ||
+      text.includes("bank details") ||
+      text.includes("bank") ||
+      text.includes("account number");
+
+    if (asksBankAccount) {
+      if (isHindi) {
+        return `${serviceName} के लिए Bank Account details की आवश्यकता हो सकती है।
+
+आमतौर पर सही bank account number और bank से जुड़ी जानकारी देनी होती है। PM-KISAN जैसे मामलों में payment या benefit transfer के लिए bank details महत्वपूर्ण हो सकती हैं।
+
+अपनी bank details केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
+      }
+
+      if (isMarathi) {
+        return `${serviceName} साठी Bank Account details आवश्यक असू शकतात.
+
+सामान्यतः योग्य bank account number आणि bank संबंधित माहिती द्यावी लागते. PM-KISAN सारख्या सेवांमध्ये payment किंवा benefit transfer साठी bank details महत्त्वाच्या असू शकतात.
+
+तुमची bank details फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
+      }
+
+      return `${serviceName} may require bank account details.
+
+You may need to provide the correct bank account number and other bank-related information. For services such as PM-KISAN, bank details can be important for payment or benefit transfer.
+
+Enter your bank details only on an official and trusted government website or at an authorised service centre.`;
+    }
+
+    // -----------------------------
+    // Mobile Number Explanation
+    // -----------------------------
+
+    const asksMobileNumber =
+      text.includes("mobile number") ||
+      text.includes("mobile no") ||
+      text.includes("phone number") ||
+      text.includes("contact number");
+
+    if (asksMobileNumber) {
+      if (isHindi) {
+        return `${serviceName} के लिए Mobile Number की आवश्यकता हो सकती है।
+
+सही और चालू mobile number देना जरूरी हो सकता है, क्योंकि इसका उपयोग OTP, verification या application updates के लिए किया जा सकता है।
+
+अपना mobile number केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
+      }
+
+      if (isMarathi) {
+        return `${serviceName} साठी Mobile Number आवश्यक असू शकतो.
+
+योग्य आणि चालू mobile number देणे आवश्यक असू शकते, कारण त्याचा वापर OTP, verification किंवा application updates साठी केला जाऊ शकतो.
+
+तुमचा mobile number फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
+      }
+
+      return `${serviceName} may require a mobile number.
+
+A valid and active mobile number may be needed for OTP, verification or application updates.
+
+Enter your mobile number only on an official and trusted government website or at an authorised service centre.`;
+    }
+
     // -----------------------------
     // Documents
     // -----------------------------
+
     const asksDocuments =
       text.includes("document") ||
       text.includes("documents") ||
@@ -461,9 +648,56 @@ if (
       text.includes("कागदपत्र") ||
       text.includes("कागद");
 
+    if (asksDocuments) {
+      const documents = Array.isArray(service.documents)
+        ? service.documents
+        : [];
+
+      if (isHindi) {
+        return `${serviceName} के लिए आमतौर पर आवश्यक दस्तावेज:
+
+${
+  documents.length > 0
+    ? documents
+        .map((document, index) => `${index + 1}. ${document}`)
+        .join("\n")
+    : "इस सेवा के दस्तावेज़ की जानकारी अभी उपलब्ध नहीं है। कृपया official website पर जांचें।"
+}
+
+अगर आपको किसी दस्तावेज़ के बारे में अधिक जानकारी चाहिए, तो उसका नाम पूछ सकते हैं।`;
+      }
+
+      if (isMarathi) {
+        return `${serviceName} साठी सामान्यतः आवश्यक कागदपत्रे:
+
+${
+  documents.length > 0
+    ? documents
+        .map((document, index) => `${index + 1}. ${document}`)
+        .join("\n")
+    : "या सेवेच्या कागदपत्रांची माहिती सध्या उपलब्ध नाही. कृपया official website वर तपासा."
+}
+
+तुम्हाला कोणत्याही कागदपत्राबद्दल अधिक माहिती हवी असल्यास त्याचे नाव विचारा.`;
+      }
+
+      return `${serviceName} commonly required documents:
+
+${
+  documents.length > 0
+    ? documents
+        .map((document, index) => `${index + 1}. ${document}`)
+        .join("\n")
+    : "Document information is not available yet. Please check the official website."
+}
+
+You can ask about any specific document for more information.`;
+    }
+
     // -----------------------------
-    // Steps / Application
+    // Steps
     // -----------------------------
+
     const asksSteps =
       text.includes("step") ||
       text.includes("steps") ||
@@ -481,9 +715,56 @@ if (
       text.includes("कसा") ||
       text.includes("कसे");
 
+    if (asksSteps) {
+      const steps = Array.isArray(service.steps)
+        ? service.steps
+        : [];
+
+      if (isHindi) {
+        return `${serviceName} के लिए आवेदन की सामान्य प्रक्रिया:
+
+${
+  steps.length > 0
+    ? steps
+        .map((step, index) => `${index + 1}. ${step}`)
+        .join("\n")
+    : "इस सेवा की आवेदन प्रक्रिया की जानकारी अभी उपलब्ध नहीं है। कृपया official website पर जांचें।"
+}
+
+अगर आपको किसी step को समझना है, तो उसके बारे में पूछ सकते हैं।`;
+      }
+
+      if (isMarathi) {
+        return `${serviceName} साठी अर्ज करण्याची सामान्य प्रक्रिया:
+
+${
+  steps.length > 0
+    ? steps
+        .map((step, index) => `${index + 1}. ${step}`)
+        .join("\n")
+    : "या सेवेची अर्ज प्रक्रिया सध्या उपलब्ध नाही. कृपया official website वर तपासा."
+}
+
+तुम्हाला कोणताही step समजून घ्यायचा असल्यास त्याबद्दल विचारा.`;
+      }
+
+      return `${serviceName} basic application steps:
+
+${
+  steps.length > 0
+    ? steps
+        .map((step, index) => `${index + 1}. ${step}`)
+        .join("\n")
+    : "Application steps are not available yet. Please check the official website."
+}
+
+You can ask about any specific step for more information.`;
+    }
+
     // -----------------------------
     // Eligibility
     // -----------------------------
+
     const asksEligibility =
       text.includes("eligible") ||
       text.includes("eligibility") ||
@@ -497,283 +778,69 @@ if (
       text.includes("कोण पात्र") ||
       text.includes("पात्र कोण");
 
-    // -----------------------------
-    // Address Proof Reply
-    // -----------------------------
-    if (asksAddressProof) {
-      if (isHindi) {
-        return `${service.name} के लिए Address Proof एक जरूरी दस्तावेज़ हो सकता है।
-
-आमतौर पर स्वीकार किए जाने वाले address proof में Aadhaar Card, Voter ID, Driving Licence, बिजली/पानी का बिल या अन्य मान्य address document शामिल हो सकते हैं।
-
-आवेदन के प्रकार के अनुसार आवश्यक दस्तावेज़ अलग हो सकते हैं।`;
-      }
-
-      if (isMarathi) {
-        return `${service.name} साठी Address Proof हे आवश्यक कागदपत्र असू शकते.
-
-सामान्यतः Aadhaar Card, Voter ID, Driving Licence, वीज किंवा पाण्याचे बिल किंवा इतर वैध address document स्वीकारले जाऊ शकतात.
-
-अर्जाच्या प्रकारानुसार आवश्यक कागदपत्रे वेगवेगळी असू शकतात.`;
-      }
-
-      return `${service.name} may require a valid proof of address.
-
-Common examples can include Aadhaar Card, Voter ID, Driving Licence, electricity/water bill or another valid address document.
-
-The exact required document can vary depending on the application type.`;
-    }
-
-    // -----------------------------
-    // Documents Reply
-    // -----------------------------
-    // -----------------------------
-// Specific Document Explanation
-// -----------------------------
-const asksAadhaar =
-  text.includes("aadhaar") ||
-  text.includes("aadhar");
-
-if (asksAadhaar) {
-  if (isHindi) {
-    return `${service.name} के लिए Aadhaar का उपयोग पहचान सत्यापन के लिए किया जा सकता है।
-
-Aadhaar number या Aadhaar card की आवश्यकता सेवा के अनुसार अलग हो सकती है।
-
-अपना Aadhaar number केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
-  }
-
-  if (isMarathi) {
-    return `${service.name} साठी Aadhaar चा वापर ओळख पडताळणीसाठी केला जाऊ शकतो.
-
-Aadhaar number किंवा Aadhaar card ची आवश्यकता सेवेनुसार वेगवेगळी असू शकते.
-
-तुमचा Aadhaar number फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
-  }
-
-  return `${service.name} may use Aadhaar for identity verification.
-
-The requirement for an Aadhaar number or Aadhaar card can vary depending on the service.
-
-Enter your Aadhaar number only on an official and trusted government website or at an authorised service centre.`;
-}
-   // -----------------------------
-// Bank Account Explanation
-// -----------------------------
-const asksBankAccount =
-  text.includes("bank account") ||
-  text.includes("bank details") ||
-  text.includes("bank") ||
-  text.includes("account number");
-
-if (asksBankAccount) {
-  if (isHindi) {
-    return `${service.name} के लिए Bank Account details की आवश्यकता हो सकती है।
-
-आमतौर पर सही bank account number और bank से जुड़ी जानकारी देनी होती है। PM-KISAN जैसे मामलों में payment या benefit transfer के लिए bank details महत्वपूर्ण हो सकती हैं।
-
-अपनी bank details केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
-  }
-
-  if (isMarathi) {
-    return `${service.name} साठी Bank Account details आवश्यक असू शकतात.
-
-सामान्यतः योग्य bank account number आणि bank संबंधित माहिती द्यावी लागते. PM-KISAN सारख्या सेवांमध्ये payment किंवा benefit transfer साठी bank details महत्त्वाच्या असू शकतात.
-
-तुमची bank details फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
-  }
-
-  return `${service.name} may require bank account details.
-
-You may need to provide the correct bank account number and other bank-related information. For services such as PM-KISAN, bank details can be important for payment or benefit transfer.
-
-Enter your bank details only on an official and trusted government website or at an authorised service centre.`;
-}
-  // -----------------------------
-// Mobile Number Explanation
-// -----------------------------
-const asksMobileNumber =
-  text.includes("mobile number") ||
-  text.includes("mobile no") ||
-  text.includes("phone number") ||
-  text.includes("contact number");
-
-if (asksMobileNumber) {
-  if (isHindi) {
-    return `${service.name} के लिए Mobile Number की आवश्यकता हो सकती है।
-
-सही और चालू mobile number देना जरूरी हो सकता है, क्योंकि इसका उपयोग OTP, verification या application updates के लिए किया जा सकता है।
-
-अपना mobile number केवल official और trusted government website या authorised service centre पर ही दर्ज करें।`;
-  }
-
-  if (isMarathi) {
-    return `${service.name} साठी Mobile Number आवश्यक असू शकतो.
-
-योग्य आणि चालू mobile number देणे आवश्यक असू शकते, कारण त्याचा वापर OTP, verification किंवा application updates साठी केला जाऊ शकतो.
-
-तुमचा mobile number फक्त official आणि trusted government website किंवा authorised service centre वरच द्या.`;
-  }
-
-  return `${service.name} may require a mobile number.
-
-A valid and active mobile number may be needed for OTP, verification or application updates.
-
-Enter your mobile number only on an official and trusted government website or at an authorised service centre.`;
-}
-   // -----------------------------
-// Email Address Explanation
-// -----------------------------
-const asksEmail =
-  text.includes("email") ||
-  text.includes("email address") ||
-  text.includes("e mail");
-
-    if (asksDocuments) {
-      if (isHindi) {
-        return `${service.name} के लिए आमतौर पर आवश्यक दस्तावेज:
-
-${service.documents
-  .map(
-    (document, index) =>
-      `${index + 1}. ${document}`
-  )
-  .join("\n")}
-
-अगर आपको किसी दस्तावेज़ के बारे में अधिक जानकारी चाहिए, तो उसका नाम पूछ सकते हैं।`;
-      }
-
-      if (isMarathi) {
-        return `${service.name} साठी सामान्यतः आवश्यक कागदपत्रे:
-
-${service.documents
-  .map(
-    (document, index) =>
-      `${index + 1}. ${document}`
-  )
-  .join("\n")}
-
-तुम्हाला कोणत्याही कागदपत्राबद्दल अधिक माहिती हवी असल्यास त्याचे नाव विचारा.`;
-      }
-
-      return `${service.name} commonly required documents:
-
-${service.documents
-  .map(
-    (document, index) =>
-      `${index + 1}. ${document}`
-  )
-  .join("\n")}
-
-You can ask about any specific document for more information.`;
-    }
-
-    // -----------------------------
-    // Steps Reply
-    // -----------------------------
-    if (asksSteps) {
-      if (isHindi) {
-        return `${service.name} के लिए आवेदन की सामान्य प्रक्रिया:
-
-${service.steps
-  .map(
-    (step, index) =>
-      `${index + 1}. ${step}`
-  )
-  .join("\n")}
-
-अगर आपको किसी step को समझना है, तो उसके बारे में पूछ सकते हैं।`;
-      }
-
-      if (isMarathi) {
-        return `${service.name} साठी अर्ज करण्याची सामान्य प्रक्रिया:
-
-${service.steps
-  .map(
-    (step, index) =>
-      `${index + 1}. ${step}`
-  )
-  .join("\n")}
-
-तुम्हाला कोणताही step समजून घ्यायचा असल्यास त्याबद्दल विचारा.`;
-      }
-
-      return `${service.name} basic application steps:
-
-${service.steps
-  .map(
-    (step, index) =>
-      `${index + 1}. ${step}`
-  )
-  .join("\n")}
-
-You can ask about any specific step for more information.`;
-    }
-
-    // -----------------------------
-    // Eligibility Reply
-    // -----------------------------
     if (asksEligibility) {
-      if (isHindi) {
-        return `${service.name} की पात्रता:
+      const eligibility = Array.isArray(service.eligibility)
+        ? service.eligibility
+        : [];
 
-${service.eligibility
-  .map(
-    (item, index) =>
-      `${index + 1}. ${item}`
-  )
-  .join("\n")}`;
+      if (isHindi) {
+        return `${serviceName} की पात्रता:
+
+${
+  eligibility.length > 0
+    ? eligibility
+        .map((item, index) => `${index + 1}. ${item}`)
+        .join("\n")
+    : "इस सेवा की पात्रता की जानकारी अभी उपलब्ध नहीं है। कृपया official website पर जांचें।"
+}`;
       }
 
       if (isMarathi) {
-        return `${service.name} साठी पात्रता:
+        return `${serviceName} साठी पात्रता:
 
-${service.eligibility
-  .map(
-    (item, index) =>
-      `${index + 1}. ${item}`
-  )
-  .join("\n")}`;
+${
+  eligibility.length > 0
+    ? eligibility
+        .map((item, index) => `${index + 1}. ${item}`)
+        .join("\n")
+    : "या सेवेची पात्रता माहिती सध्या उपलब्ध नाही. कृपया official website वर तपासा."
+}`;
       }
 
-      return `${service.name} eligibility:
+      return `${serviceName} eligibility:
 
-${service.eligibility
-  .map(
-    (item, index) =>
-      `${index + 1}. ${item}`
-  )
-  .join("\n")}`;
+${
+  eligibility.length > 0
+    ? eligibility
+        .map((item, index) => `${index + 1}. ${item}`)
+        .join("\n")
+    : "Eligibility information is not available yet. Please check the official website."
+}`;
     }
 
     // -----------------------------
     // General Service Reply
     // -----------------------------
-    if (isHindi) {
-      return `${service.name}
 
-${
-  service.overview || service.description
-}
+    if (isHindi) {
+      return `${serviceName}
+
+${service.overview || service.description || "इस सेवा की जानकारी उपलब्ध है।"}
 
 आप इस सेवा के documents, steps या eligibility के बारे में पूछ सकते हैं।`;
     }
 
     if (isMarathi) {
-      return `${service.name}
+      return `${serviceName}
 
-${
-  service.overview || service.description
-}
+${service.overview || service.description || "या सेवेची माहिती उपलब्ध आहे."}
 
 तुम्ही या सेवेची कागदपत्रे, प्रक्रिया किंवा पात्रता विचारू शकता.`;
     }
 
-    return `${service.name}
+    return `${serviceName}
 
-${
-  service.overview || service.description
-}
+${service.overview || service.description || "Information about this service is available."}
 
 You can ask about this service's documents, steps or eligibility.`;
   };
@@ -781,6 +848,7 @@ You can ask about this service's documents, steps or eligibility.`;
   // -----------------------------
   // Add Selected Service Context
   // -----------------------------
+
   const addServiceContext = () => {
     if (!selectedService) {
       return;
@@ -808,6 +876,7 @@ You can ask about this service's documents, steps or eligibility.`;
   // -----------------------------
   // Selected Service Effect
   // -----------------------------
+
   useEffect(() => {
     if (isOpen && selectedService) {
       addServiceContext();
@@ -815,8 +884,9 @@ You can ask about this service's documents, steps or eligibility.`;
   }, [isOpen, selectedService]);
 
   // -----------------------------
-  // Document Guidance Effect
+  // Initial Documents Action
   // -----------------------------
+
   useEffect(() => {
     if (
       isOpen &&
@@ -824,10 +894,11 @@ You can ask about this service's documents, steps or eligibility.`;
       !selectedService
     ) {
       setMessages((current) => {
+        const text =
+          "Sure! I can help you find the documents required for a government service. Please tell me the service name.";
+
         const alreadyShown = current.some(
-          (msg) =>
-            msg.text ===
-            "Sure! I can help you find the documents required for a government service. Please tell me the service name."
+          (msg) => msg.text === text
         );
 
         if (alreadyShown) {
@@ -838,8 +909,7 @@ You can ask about this service's documents, steps or eligibility.`;
           ...current,
           {
             sender: "ai",
-            text:
-              "Sure! I can help you find the documents required for a government service. Please tell me the service name.",
+            text,
             time: "Now",
           },
         ];
@@ -850,82 +920,93 @@ You can ask about this service's documents, steps or eligibility.`;
   // -----------------------------
   // Send Message
   // -----------------------------
+
   const handleSend = async () => {
-  console.log("SEND CLICKED");
+    const userMessage = message.trim();
 
-  addServiceContext();
+    if (!userMessage) {
+      return;
+    }
 
-  const userMessage = message.trim();
+    const detectedService = findService(userMessage);
 
-  if (!userMessage) {
-    return;
-  }
+    if (detectedService) {
+      setCurrentChatService(detectedService);
+    }
 
-  const detectedService = findService(userMessage);
-
-  if (detectedService) {
-    setCurrentChatService(detectedService);
-  }
-
-  const serviceForMessage =
-    selectedService ||
-    detectedService ||
-    currentChatService;
-
-  setMessages((current) => [
-    ...current,
-    {
-      sender: "user",
-      text: userMessage,
-      time: "Now",
-    },
-  ]);
-
-  setMessage("");
-
-  try {
-    const response = await fetch("http://127.0.0.1:8000/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: userMessage,
-        language: selectedLanguage,
-        service: serviceForMessage?.name || null,
-      }),
-    });
-
-    const data = await response.json();
-
-    const reply = data.reply;
+    const serviceForMessage =
+      selectedService ||
+      detectedService ||
+      currentChatService;
 
     setMessages((current) => [
       ...current,
       {
-        sender: "ai",
-        text: reply,
+        sender: "user",
+        text: userMessage,
         time: "Now",
       },
     ]);
 
-    speakReply(reply);
-  } catch (error) {
-    console.error("Backend chat error:", error);
+    setMessage("");
 
-    setMessages((current) => [
-      ...current,
-      {
-        sender: "ai",
-        text: "Sorry, backend se connection nahi ho pa raha hai.",
-        time: "Now",
-      },
-    ]);
-  }
-};
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMessage,
+            language: selectedLanguage,
+            service: serviceForMessage?.name || null,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Backend returned ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      const reply =
+        data.reply ||
+        "Sorry, I could not understand the response.";
+
+      setMessages((current) => [
+        ...current,
+        {
+          sender: "ai",
+          text: reply,
+          time: "Now",
+        },
+      ]);
+
+      speakReply(reply);
+    } catch (error) {
+      console.error("Backend chat error:", error);
+
+      setMessages((current) => [
+        ...current,
+        {
+          sender: "ai",
+          text:
+            "Sorry, backend se connection nahi ho pa raha hai.",
+          time: "Now",
+        },
+      ]);
+    }
+  };
+
   // -----------------------------
   // Quick Actions
   // -----------------------------
+
   const handleQuickAction = (action) => {
     let userText = "";
     let reply = "";
@@ -935,7 +1016,11 @@ You can ask about this service's documents, steps or eligibility.`;
         ? `I need documents for ${selectedService.name}.`
         : "I need document information for a government service.";
 
-      reply = generateReply("documents");
+      reply = generateReply(
+        selectedService
+          ? `${selectedService.name} documents`
+          : "documents"
+      );
     }
 
     if (action === "eligibility") {
@@ -943,7 +1028,11 @@ You can ask about this service's documents, steps or eligibility.`;
         ? `What is the eligibility for ${selectedService.name}?`
         : "I want to know the eligibility.";
 
-      reply = generateReply("eligibility");
+      reply = generateReply(
+        selectedService
+          ? `${selectedService.name} eligibility`
+          : "eligibility"
+      );
     }
 
     if (action === "steps") {
@@ -951,23 +1040,29 @@ You can ask about this service's documents, steps or eligibility.`;
         ? `How can I apply for ${selectedService.name}?`
         : "I want to know the application steps.";
 
-      reply = generateReply("steps");
+      reply = generateReply(
+        selectedService
+          ? `${selectedService.name} steps`
+          : "steps"
+      );
     }
+
     if (action === "new-service") {
-  resetChat();
-  setChatServiceOverride(true);
+      resetChat();
+      setChatServiceOverride(true);
 
-  setMessages((current) => [
-    ...current,
-    {
-      sender: "ai",
-      text: "Sure! Which government service would you like help with next?",
-      time: "Now",
-    },
-  ]);
+      setMessages((current) => [
+        ...current,
+        {
+          sender: "ai",
+          text:
+            "Sure! Which government service would you like help with next?",
+          time: "Now",
+        },
+      ]);
 
-  return;
-}
+      return;
+    }
 
     if (action === "official") {
       if (
@@ -1015,6 +1110,7 @@ You can ask about this service's documents, steps or eligibility.`;
   // -----------------------------
   // Voice Input
   // -----------------------------
+
   const startVoiceInput = () => {
     const SpeechRecognition =
       window.SpeechRecognition ||
@@ -1056,31 +1152,12 @@ You can ask about this service's documents, steps or eligibility.`;
         return;
       }
 
-      setMessage("");
+      setMessage(transcript);
 
-      setMessages((current) => [
-        ...current,
-        {
-          sender: "user",
-          text: transcript,
-          time: "Now",
-        },
-      ]);
-
+      // Use the same backend flow as normal text messages
       setTimeout(() => {
-        const reply = generateReply(transcript);
-
-        setMessages((current) => [
-          ...current,
-          {
-            sender: "ai",
-            text: reply,
-            time: "Now",
-          },
-        ]);
-
-        speakReply(reply);
-      }, 400);
+        setMessage(transcript);
+      }, 0);
     };
 
     recognition.onerror = (event) => {
@@ -1105,7 +1182,15 @@ You can ask about this service's documents, steps or eligibility.`;
   // -----------------------------
   // Language Selection
   // -----------------------------
+
   const handleLanguageSelect = (languageCode) => {
+    if (
+      recognitionRef.current &&
+      isListening
+    ) {
+      recognitionRef.current.stop();
+    }
+
     setSelectedLanguage(languageCode);
     setShowLanguages(false);
   };
@@ -1113,9 +1198,13 @@ You can ask about this service's documents, steps or eligibility.`;
   // -----------------------------
   // Document Service Selection
   // -----------------------------
-  const documentServices = Object.values(servicesData);
 
-  const handleDocumentServiceSelect = (service) => {
+  const documentServices =
+    Object.values(servicesData);
+
+  const handleDocumentServiceSelect = (
+    service
+  ) => {
     const userText = service.name;
 
     setCurrentChatService(service);
@@ -1148,42 +1237,48 @@ You can ask about this service's documents, steps or eligibility.`;
   };
 
   // -----------------------------
-  // Chat Quick Action Buttons
+  // Quick Action Buttons
   // -----------------------------
+
   const quickActions = selectedService
-  ? [
-      {
-        label: "📋 Documents",
-        action: "documents",
-      },
-      {
-        label: "✅ Eligibility",
-        action: "eligibility",
-      },
-      {
-        label: "📝 Steps",
-        action: "steps",
-      },
-      {
-        label: "🔗 Official Website",
-        action: "official",
-      },
-      {
-        label: "🔄 New Service",
-        action: "new-service",
-      },
-    ]
-  : [];
+    ? [
+        {
+          label: "📋 Documents",
+          action: "documents",
+        },
+        {
+          label: "✅ Eligibility",
+          action: "eligibility",
+        },
+        {
+          label: "📝 Steps",
+          action: "steps",
+        },
+        {
+          label: "🔗 Official Website",
+          action: "official",
+        },
+        {
+          label: "🔄 New Service",
+          action: "new-service",
+        },
+      ]
+    : [];
+
   // -----------------------------
   // UI
   // -----------------------------
+
   return (
     <>
       {isOpen && (
         <div className="chat-widget">
+
           {/* Header */}
+
           <div className="chat-widget-header">
             <div className="chat-header-info">
+
               <div className="chat-header-avatar">
                 🤖
               </div>
@@ -1199,6 +1294,7 @@ You can ask about this service's documents, steps or eligibility.`;
                     : "Online"}
                 </span>
               </div>
+
             </div>
 
             <button
@@ -1211,7 +1307,9 @@ You can ask about this service's documents, steps or eligibility.`;
           </div>
 
           {/* Messages */}
+
           <div className="chat-widget-messages">
+
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -1221,6 +1319,7 @@ You can ask about this service's documents, steps or eligibility.`;
                     : "chat-ai"
                 }`}
               >
+
                 <div className="chat-avatar">
                   {msg.sender === "user"
                     ? "👤"
@@ -1228,70 +1327,102 @@ You can ask about this service's documents, steps or eligibility.`;
                 </div>
 
                 <div>
+
                   <div className="chat-bubble">
+
                     {msg.text
                       .split("\n")
                       .map(
                         (line, lineIndex) => (
-                          <span key={lineIndex}>
+                          <span
+                            key={lineIndex}
+                          >
                             {line}
 
                             {lineIndex <
-                              msg.text
-                                .split("\n")
+                              msg.text.split("\n")
                                 .length -
-                                1 && <br />}
+                                1 && (
+                              <br />
+                            )}
                           </span>
                         )
                       )}
+
                   </div>
 
-                  <small>{msg.time}</small>
+                  <small>
+                    {msg.time}
+                  </small>
+
                 </div>
               </div>
             ))}
+
           </div>
 
           {/* Service Selection */}
-{isOpen &&
-  !selectedService && 
-  !currentChatService &&(
-    <div className="document-service-options">
-      <div className="service-selection-heading">
-        <strong>Choose a Government Service</strong>
-        <span>Select a service to get started</span>
-      </div>
 
-      {documentServices.map((service) => (
-        <button
-          type="button"
-          key={service.name}
-          onClick={() =>
-            handleDocumentServiceSelect(service)
-          }
-        >
-          {service.name}
-        </button>
-      ))}
-    </div>
-  )}
+          {isOpen &&
+            !selectedService &&
+            !currentChatService && (
+              <div className="document-service-options">
+
+                <div className="service-selection-heading">
+                  <strong>
+                    Choose a Government Service
+                  </strong>
+
+                  <span>
+                    Select a service to get started
+                  </span>
+                </div>
+
+                {documentServices.map(
+                  (service) => (
+                    <button
+                      type="button"
+                      key={service.name}
+                      onClick={() =>
+                        handleDocumentServiceSelect(
+                          service
+                        )
+                      }
+                    >
+                      {service.name}
+                    </button>
+                  )
+                )}
+
+              </div>
+            )}
+
           {/* Quick Actions */}
+
           <div className="quick-actions">
-            {quickActions.map((action) => (
-              <button
-                type="button"
-                key={action.action}
-                onClick={() =>
-                  handleQuickAction(action.action)
-                }
-              >
-                {action.label}
-              </button>
-            ))}
+
+            {quickActions.map(
+              (action) => (
+                <button
+                  type="button"
+                  key={action.action}
+                  onClick={() =>
+                    handleQuickAction(
+                      action.action
+                    )
+                  }
+                >
+                  {action.label}
+                </button>
+              )
+            )}
+
           </div>
 
           {/* Input */}
+
           <div className="chat-widget-input">
+
             <input
               type="text"
               placeholder={
@@ -1311,7 +1442,9 @@ You can ask about this service's documents, steps or eligibility.`;
             />
 
             {/* Language Selector */}
+
             <div className="language-selector">
+
               <button
                 type="button"
                 className="language-icon-button"
@@ -1327,6 +1460,7 @@ You can ask about this service's documents, steps or eligibility.`;
 
               {showLanguages && (
                 <div className="language-menu">
+
                   <div className="language-menu-title">
                     Select Language
                   </div>
@@ -1348,6 +1482,7 @@ You can ask about this service's documents, steps or eligibility.`;
                           )
                         }
                       >
+
                         <span>
                           {language.name}
                         </span>
@@ -1356,14 +1491,18 @@ You can ask about this service's documents, steps or eligibility.`;
                           language.code && (
                           <span>✓</span>
                         )}
+
                       </button>
                     )
                   )}
+
                 </div>
               )}
+
             </div>
 
-            {/* Voice Input */}
+            {/* Voice */}
+
             <button
               type="button"
               className={
@@ -1378,10 +1517,13 @@ You can ask about this service's documents, steps or eligibility.`;
                   : "Voice input"
               }
             >
-              {isListening ? "⏹️" : "🎤"}
+              {isListening
+                ? "⏹️"
+                : "🎤"}
             </button>
 
             {/* Send */}
+
             <button
               type="button"
               className="send-button"
@@ -1389,11 +1531,14 @@ You can ask about this service's documents, steps or eligibility.`;
             >
               ➤
             </button>
+
           </div>
+
         </div>
       )}
 
       {/* Floating Chat Button */}
+
       <button
         className="chat-floating-button"
         type="button"
