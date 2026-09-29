@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 
 function HeroSection({ onOpenChat }) {
-  console.log("HeroSection onOpenChat:", onOpenChat);
   const navigate = useNavigate();
 
-  const user = {
-    name: "Ajay",
-  };
+  const savedUser = localStorage.getItem("citizenAssistUser");
+
+  const user = savedUser
+    ? JSON.parse(savedUser)
+    : {
+        name: "Citizen",
+      };
 
   const quickActions = [
     {
@@ -36,9 +39,10 @@ function HeroSection({ onOpenChat }) {
     }
 
     if (action === "documents") {
-  onOpenChat(null, "documents");
-  return;
-}
+      onOpenChat(null, "documents");
+      return;
+    }
+
     if (action === "chat") {
       onOpenChat();
     }
@@ -48,7 +52,6 @@ function HeroSection({ onOpenChat }) {
     <section className="dashboard-hero">
       <div className="dashboard-container">
 
-        {/* Greeting */}
         <div className="dashboard-greeting">
           <div>
             <p className="dashboard-eyebrow">
@@ -74,8 +77,6 @@ function HeroSection({ onOpenChat }) {
           </button>
         </div>
 
-
-        {/* AI Assistant Banner */}
         <div className="assistant-banner">
 
           <div className="assistant-banner-content">
@@ -110,8 +111,6 @@ function HeroSection({ onOpenChat }) {
 
         </div>
 
-
-        {/* Quick Actions */}
         <div className="quick-actions">
 
           {quickActions.map((action) => (

@@ -9,7 +9,7 @@ function ChatWidget({
   selectedService,
   initialAction,
 }) {
-  
+
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
@@ -61,7 +61,7 @@ function ChatWidget({
   // Voice Output
   // -----------------------------
 
- const cleanTextForSpeech = (text) => {
+const cleanTextForSpeech = (text) => {
   return text
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/\*(.*?)\*/g, "$1")
@@ -79,19 +79,42 @@ const speakReply = (text) => {
     return;
   }
 
+  const cleanText = cleanTextForSpeech(text);
+
+  if (!cleanText) {
+    return;
+  }
+
   window.speechSynthesis.cancel();
 
-  const speechText = cleanTextForSpeech(text);
+  const utterance = new SpeechSynthesisUtterance(cleanText);
 
-  const utterance = new SpeechSynthesisUtterance(speechText);
+  const voices = window.speechSynthesis.getVoices();
+
+  const matchingVoice = voices.find((voice) =>
+    voice.lang.toLowerCase().startsWith(
+      (selectedLanguage || "en-IN").split("-")[0].toLowerCase()
+    )
+  );
+
+  if (matchingVoice) {
+    utterance.voice = matchingVoice;
+  }
 
   utterance.lang = selectedLanguage || "en-IN";
   utterance.rate = 0.95;
   utterance.pitch = 1;
 
+  utterance.onend = () => {
+    window.speechSynthesis.cancel();
+  };
+
+  utterance.onerror = (event) => {
+    console.error("Speech synthesis error:", event.error);
+  };
+
   window.speechSynthesis.speak(utterance);
 };
-
   // -----------------------------
   // Edit Distance
   // -----------------------------
@@ -210,11 +233,13 @@ const speakReply = (text) => {
           if (userWord === serviceWord) {
             serviceScore += 3;
           } else if (
-            userWord.includes(serviceWord) ||
-            serviceWord.includes(userWord)
-          ) {
-            serviceScore += 2;
-          } else if (
+  userWord.length >= 4 &&
+  serviceWord.length >= 4 &&
+  (userWord.includes(serviceWord) ||
+    serviceWord.includes(userWord))
+) {
+  serviceScore += 2;
+} else if (
             serviceWord.length >= 5 &&
             getEditDistance(userWord, serviceWord) <= 2
           ) {
@@ -937,6 +962,49 @@ You can ask about this service's documents, steps or eligibility.`;
   // Send Message
   // -----------------------------
 
+  const getOfflineReply = (userMessage, service) => {
+  const text = userMessage.toLowerCase();
+
+  if (!service) {
+    return "You are offline. Please select a government service to view its cached information.";
+  }
+
+  if (
+    text.includes("document") ||
+    text.includes("documents") ||
+    text.includes("kagaz") ||
+    text.includes("kagaj")
+  ) {
+    return `Required documents for ${service.name}:\n\n${service.documents
+      .map((doc, index) => `${index + 1}. ${doc}`)
+      .join("\n")}`;
+  }
+
+  if (
+    text.includes("step") ||
+    text.includes("process") ||
+    text.includes("apply") ||
+    text.includes("kaise")
+  ) {
+    return `Application steps for ${service.name}:\n\n${service.steps
+      .map((step, index) => `${index + 1}. ${step}`)
+      .join("\n")}`;
+  }
+
+  if (
+    text.includes("eligibility") ||
+    text.includes("eligible") ||
+    text.includes("patr") ||
+    text.includes("पात्र")
+  ) {
+    return `Eligibility information for ${service.name}:\n\n${service.eligibility
+      .map((item, index) => `${index + 1}. ${item}`)
+      .join("\n")}`;
+  }
+
+  return `${service.name}\n\n${service.overview}`;
+};
+
   const handleSend = async () => {
     const userMessage = message.trim();
 
@@ -946,14 +1014,46 @@ You can ask about this service's documents, steps or eligibility.`;
 
     const detectedService = findService(userMessage);
 
+const intentWords = [
+  "document",
+  "documents",
+  "eligibility",
+  "eligible",
+  "steps",
+  "step",
+  "process",
+  "apply",
+  "application",
+  "how",
+  "kaise",
+  "proof",
+];
+
+const normalizedMessage = userMessage
+  .toLowerCase()
+  .replace(/[-_]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const isIntentOnly = normalizedMessage
+  .split(/\s+/)
+  .every((word) => intentWords.includes(word));
+
+const serviceForMessage =
+  isIntentOnly && currentChatService
+    ? currentChatService
+    : detectedService || currentChatService || selectedService;
+      console.log("Selected Service:", selectedService);
+
+      console.log("Detected Service:", detectedService);
+
+      console.log("Current Chat Service:", currentChatService);
+
+      console.log("Service Sent to Backend:", serviceForMessage);
+
     if (detectedService) {
       setCurrentChatService(detectedService);
     }
-
-    const serviceForMessage =
-      selectedService ||
-      detectedService ||
-      currentChatService;
 
     setMessages((current) => [
       ...current,
@@ -966,33 +1066,46 @@ You can ask about this service's documents, steps or eligibility.`;
 
     setMessage("");
 
+    if (!navigator.onLine) {
+  const offlineReply = getOfflineReply(
+    userMessage,
+    serviceForMessage
+  );
+
+  setMessages((current) => [
+    ...current,
+    {
+      sender: "ai",
+      text: offlineReply,
+      time: "Now",
+    },
+  ]);
+
+  speakReply(offlineReply);
+  return;
+}
+
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: userMessage,
-            language: selectedLanguage,
-            service: serviceForMessage?.name || null,
-          }),
-        }
-      );
+      const response = await fetch("http://127.0.0.1:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          language: selectedLanguage,
+          service: serviceForMessage?.name || null,
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error(
-          `Backend returned ${response.status}`
-        );
+        throw new Error(`Backend returned ${response.status}`);
       }
 
       const data = await response.json();
 
       const reply =
-        data.reply ||
-        "Sorry, I could not understand the response.";
+        data.reply || "Sorry, I could not understand the response.";
 
       setMessages((current) => [
         ...current,
@@ -1011,8 +1124,7 @@ You can ask about this service's documents, steps or eligibility.`;
         ...current,
         {
           sender: "ai",
-          text:
-            "Sorry, backend se connection nahi ho pa raha hai.",
+          text: "Sorry, backend se connection nahi ho pa raha hai.",
           time: "Now",
         },
       ]);
@@ -1123,7 +1235,7 @@ You can ask about this service's documents, steps or eligibility.`;
     }, 400);
   };
 
-  
+
 // -----------------------------
 // Voice Input
 // -----------------------------
@@ -1171,6 +1283,25 @@ You can ask about this service's documents, steps or eligibility.`;
       const serviceForMessage = selectedService ||
         detectedService ||
         currentChatService;
+
+        if (!navigator.onLine) {
+  const offlineReply = getOfflineReply(
+    transcript,
+    serviceForMessage
+  );
+
+  setMessages((current) => [
+    ...current,
+    {
+      sender: "ai",
+      text: offlineReply,
+      time: "Now",
+    },
+  ]);
+
+  speakReply(offlineReply);
+  return;
+}
 
       // Show user's voice message
       setMessages((current) => [

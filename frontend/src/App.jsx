@@ -11,6 +11,20 @@ import ChatWidget from "./components/ChatWidget";
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+useEffect(() => {
+  const handleOnline = () => setIsOnline(true);
+  const handleOffline = () => setIsOnline(false);
+
+  window.addEventListener("online", handleOnline);
+  window.addEventListener("offline", handleOffline);
+
+  return () => {
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("offline", handleOffline);
+  };
+}, []);
   useEffect(() => {
   fetch("http://127.0.0.1:8000/")
     .then((response) => response.json())
@@ -33,8 +47,14 @@ function App() {
 
   return (
     <BrowserRouter>
+    {!isOnline && (
+  <div className="offline-banner">
+    You are offline. Cached service information is still available.
+  </div>
+)}
       <Navbar
         onOpenChat={() => openChat()}
+
       />
 
       <main>

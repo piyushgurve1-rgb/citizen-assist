@@ -1,11 +1,32 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
 function Navbar({ onOpenChat }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-
+  // Get logged-in user
+  const getUser = () => {
+    const savedUser = localStorage.getItem("citizenAssistUser");
+    if (!savedUser) {
+      return null;
+    }
+    try {
+      return JSON.parse(savedUser);
+    } catch (error) {
+      console.error("User data error:", error);
+      return null;
+    }
+  };
+  const user = getUser();
+  // Logout
+  const handleLogout = () => {
+    localStorage.removeItem("citizenAssistUser");
+    setShowProfileMenu(false);
+    navigate("/login");
+  };
+  // First letter for avatar
+  const avatarLetter =
+    user?.name?.charAt(0)?.toUpperCase() || "U";
   return (
     <nav className="navbar">
       {/* Logo */}
@@ -13,7 +34,6 @@ function Navbar({ onOpenChat }) {
         <span className="brand-icon">🇮🇳</span>
         <span>CitizenAssist</span>
       </Link>
-
       {/* Navigation */}
       <div className="navbar-links">
         <Link
@@ -26,7 +46,6 @@ function Navbar({ onOpenChat }) {
         >
           Home
         </Link>
-
         <Link
           to="/services"
           className={
@@ -37,7 +56,6 @@ function Navbar({ onOpenChat }) {
         >
           Services
         </Link>
-
         <button
           type="button"
           className="nav-action"
@@ -46,19 +64,18 @@ function Navbar({ onOpenChat }) {
           AI Assistant
         </button>
       </div>
-
       {/* Right side */}
       <div className="navbar-right">
-
-        {/* Login */}
-        <button
-          type="button"
-          className="nav-login-button"
-          onClick={() => navigate("/login")}
-        >
-          Login
-        </button>
-
+        {/* Login button only when user is not logged in */}
+        {!user && (
+          <button
+            type="button"
+            className="nav-login-button"
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </button>
+        )}
         {/* Notification */}
         <button
           type="button"
@@ -68,46 +85,48 @@ function Navbar({ onOpenChat }) {
           🔔
           <span className="notification-dot"></span>
         </button>
-
         {/* Profile */}
-        <div className="profile-wrapper">
-          <button
-            type="button"
-            className="profile-button"
-            onClick={() =>
-              setShowProfileMenu(!showProfileMenu)
-            }
-          >
-            <span className="profile-avatar">
-              A
-            </span>
-
-            <span className="profile-info">
-              <strong>Ajay</strong>
-              <small>Citizen</small>
-            </span>
-
-            <span className="profile-arrow">
-              {showProfileMenu ? "⌃" : "⌄"}
-            </span>
-          </button>
-
-          {showProfileMenu && (
-            <div className="profile-menu">
-              <button type="button">
-                ⚙️ Settings
-              </button>
-
-              <button type="button">
-                ↪ Logout
-              </button>
-            </div>
-          )}
-        </div>
-
+        {user && (
+          <div className="profile-wrapper">
+            <button
+              type="button"
+              className="profile-button"
+              onClick={() =>
+                setShowProfileMenu(!showProfileMenu)
+              }
+            >
+              <span className="profile-avatar">
+                {avatarLetter}
+              </span>
+              <span className="profile-info">
+                <strong>
+                  {user.name || "User"}
+                </strong>
+                <small>
+                  {user.email || "Citizen"}
+                </small>
+              </span>
+              <span className="profile-arrow">
+                {showProfileMenu ? "⌃" : "⌄"}
+              </span>
+            </button>
+            {showProfileMenu && (
+              <div className="profile-menu">
+                <button type="button">
+                  ⚙️ Settings
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                >
+                  ↪ Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );
 }
-
 export default Navbar;
