@@ -1,0 +1,93 @@
+[
+  {
+    "service": "PM-KISAN",
+    "category": "Agriculture",
+    "content": "PM-KISAN provides income support to eligible landholding farmer families. Eligible farmer families receive ₹6,000 per year in three equal installments through Direct Benefit Transfer (DBT). Commonly required information includes Aadhaar number, mobile number, bank account details and land-related information. Applicants should verify eligibility and complete the required registration and eKYC process through the official PM-KISAN portal.",
+    "keywords": [
+      "PM-KISAN",
+      "PM Kisan",
+      "farmer",
+      "agriculture",
+      "documents",
+      "eligibility",
+      "eKYC",
+      "registration"
+    ],
+    "official_url": "https://pmkisan.gov.in/"
+  },
+  {
+    "service": "Ayushman Bharat",
+    "category": "Healthcare",
+    "content": "Ayushman Bharat provides health coverage to eligible beneficiaries. Eligible beneficiaries can access cashless healthcare services at empanelled hospitals, subject to applicable scheme rules. Beneficiary eligibility and details should be verified through the official government system.",
+    "keywords": [
+      "Ayushman Bharat",
+      "Ayushman card",
+      "health",
+      "hospital",
+      "medical",
+      "healthcare",
+      "eligibility"
+    ],
+    "official_url": "https://nha.gov.in/"
+  },
+  {
+    "service": "Passport",
+    "category": "Identity",
+    "content": "Indian passport applications are processed through the official Passport Seva system. Applicants generally need identity proof, address proof and applicable date-of-birth or supporting documents. The process includes registration, selecting the required passport service, filling the application, paying the applicable fee, scheduling an appointment and visiting the designated centre when required. Application status can be tracked through the official Passport Seva portal.",
+    "keywords": [
+      "passport",
+      "passport application",
+      "travel",
+      "identity",
+      "documents",
+      "appointment",
+      "application"
+    ],
+    "official_url": "https://www.passportindia.gov.in/"
+  },
+  {
+    "service": "Driving Licence",
+    "category": "Transport",
+    "content": "Driving licence services are provided through the official Parivahan system. Depending on the service, the process may include learner licence application, document submission, fee payment, appointment booking and driving test. Applicants should meet the applicable age and eligibility requirements and track their application through the official system.",
+    "keywords": [
+      "driving licence",
+      "driving license",
+      "DL",
+      "vehicle",
+      "transport",
+      "learner licence",
+      "driving test"
+    ],
+    "official_url": "https://parivahan.gov.in/"
+  },
+  {
+    "service": "Income Certificate",
+    "category": "Certificates",
+    "content": "An income certificate provides official information about a person's or family's income and may be required for government services, benefits and applications. Applicants generally provide identity proof, address proof and income-related documents. The exact process and issuing authority may vary by state.",
+    "keywords": [
+      "income certificate",
+      "income",
+      "income proof",
+      "family income",
+      "salary",
+      "certificate"
+    ],
+    "official_url": "#"
+  },
+  {
+    "service": "Scholarship",
+    "category": "Education",
+    "content": "Government scholarships are available under different schemes with different eligibility conditions. Depending on the scholarship, academic performance, income, category, institution and other conditions may apply. Applicants generally need identity details, student or enrollment information, academic documents and bank account details. Requirements should be verified for the selected scholarship before applying.",
+    "keywords": [
+      "scholarship",
+      "student",
+      "education",
+      "college",
+      "school",
+      "financial aid",
+      "documents",
+      "eligibility"
+    ],
+    "official_url": "https://scholarships.gov.in/"
+  }
+]
