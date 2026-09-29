@@ -216,11 +216,16 @@ def get_local_answer(message, language):
 
 # -------------------- Models --------------------
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
 class ChatRequest(BaseModel):
     message: str
     language: str = "en-IN"
     service: str | None = None
-
+    history: list[ChatMessage] = []
 
 class RegisterRequest(BaseModel):
     name: str
@@ -340,7 +345,7 @@ def generate_ai_response(prompt, message="", language="en-IN"):
         )
 
         answer = response.choices[0].message.content
-        
+
 
         if answer:
             print("AI Provider: Groq")
@@ -559,7 +564,7 @@ def is_step_question(message):
 
 
 
-    
+
 # -------------------- Chat --------------------
 
 @app.post("/chat")
@@ -568,6 +573,15 @@ def chat(request: ChatRequest):
     message = request.message.strip().lower()
     language = request.language
     service = request.service
+    # -------------------- Conversation History --------------------
+
+    history_text = ""
+
+    if request.history:
+        history_text = "\n".join(
+            f"{item.role}: {item.content}"
+            for item in request.history[-6:]
+        )
     # Hindi / Marathi voice intent normalization
     message = (
         message
@@ -630,11 +644,19 @@ def chat(request: ChatRequest):
         return {
             "reply": reply
         }
-    # -------------------- RAG Retrieval --------------------
+    # -------------------- Context-Aware RAG Retrieval --------------------
 
-    rag_results = retrieve_information(message, top_k=3)
+    # -------------------- Context-Aware RAG Retrieval --------------------
 
-    # Keep only the most relevant result
+    rag_query = message
+
+    if history_text:
+        rag_query = f"{history_text}\nCurrent question: {message}"
+
+    if service:
+        rag_query = f"{service} {rag_query}"
+
+    rag_results = retrieve_information(rag_query, top_k=3)
     if rag_results:
         best_result = rag_results[0]
 
@@ -667,18 +689,17 @@ Information:
                 "reply": "Please mention the government service whose official website you need."
             }
 
-        # -------------------- RAG Direct Document Answer --------------------
+    # -------------------- RAG Direct Document Answer --------------------
 
-        if (
-            "document" in message
-            or "documents" in message
-            or "proof" in message
-        ) and rag_context:
-            return {
-                "reply": rag_context
-            }
+
 
     # General questions → Gemini AI
+    history_text = "\n".join(
+        f"{item.role}: {item.content}"
+        for item in request.history
+        if item.content.strip()
+    ) or "No previous conversation."
+
     prompt = f"""
 You are CitizenAssist, a government-service assistant for Indian citizens.
 
@@ -698,6 +719,9 @@ Rules:
 - Use simple language.
 - If steps are needed, give numbered steps.
 - If documents are asked, give only the relevant documents.
+- For document questions, use only the documents or information explicitly listed in the RAG context.
+- Do not add sub-details, examples, mandatory/required claims, or document fields that are not explicitly present in the RAG context.
+- Do not turn "commonly required" information into "mandatory" requirements.
 - Do not invent fees, deadlines, eligibility rules, or official links.
 - Never guess eligibility criteria, income limits, benefit amounts,
   document requirements, or deadlines.
@@ -729,8 +753,13 @@ Rules:
 - If the RAG context does not contain the requested information, clearly say that the available information is insufficient and direct the user to the official URL provided in the RAG context.
 - Do not add details such as IFSC code, OTP, possession proof, passport-size photo, income limits, land limits, etc. unless they are explicitly present in the RAG context.
   RAG context:
+Conversation history:
+{history_text}
+
+RAG context:
 {rag_context}
-User question:
+
+Current user question:
 {message}
 """
 

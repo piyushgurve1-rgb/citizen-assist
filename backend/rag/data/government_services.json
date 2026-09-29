@@ -16,20 +16,26 @@
     "official_url": "https://pmkisan.gov.in/"
   },
   {
-    "service": "Ayushman Bharat",
-    "category": "Healthcare",
-    "content": "Ayushman Bharat provides health coverage to eligible beneficiaries. Eligible beneficiaries can access cashless healthcare services at empanelled hospitals, subject to applicable scheme rules. Beneficiary eligibility and details should be verified through the official government system.",
-    "keywords": [
-      "Ayushman Bharat",
-      "Ayushman card",
-      "health",
-      "hospital",
-      "medical",
-      "healthcare",
-      "eligibility"
-    ],
-    "official_url": "https://nha.gov.in/"
-  },
+  "service": "Ayushman Bharat",
+  "category": "Healthcare",
+  "content": "Ayushman Bharat provides health coverage and cashless healthcare services to eligible beneficiaries at empanelled hospitals, subject to applicable scheme rules. For services under the Pradhan Mantri Jan Arogya Yojana (PM-JAY), beneficiaries should verify their eligibility and beneficiary status through the official government system. Depending on the service or verification process, commonly requested information may include Aadhaar or another accepted identity document and beneficiary or family details. Applicants and beneficiaries should verify the exact documents and requirements applicable to their case through the official National Health Authority portal before using the service.",
+  "keywords": [
+    "Ayushman Bharat",
+    "Ayushman card",
+    "PM-JAY",
+    "PMJAY",
+    "health",
+    "hospital",
+    "medical",
+    "healthcare",
+    "eligibility",
+    "beneficiary",
+    "documents",
+    "Aadhaar",
+    "identity proof"
+  ],
+  "official_url": "https://nha.gov.in/"
+},
   {
     "service": "Passport",
     "category": "Identity",
@@ -45,21 +51,46 @@
     ],
     "official_url": "https://www.passportindia.gov.in/"
   },
+     {
+  "service": "PAN Card",
+  "category": "Identity and Tax",
+  "content": "PAN (Permanent Account Number) is issued by the Income Tax Department. Document requirements depend on the application method. For Instant e-PAN, an individual who has not already been allotted a PAN needs a valid Aadhaar number, a mobile number linked with Aadhaar, and access to DigiLocker. The Instant e-PAN process uses DigiLocker to obtain supporting proof of date of birth. For regular PAN applications, applicants may need documents serving as proof of identity, proof of address and proof of date of birth, depending on the applicant and application type. Applicants should verify the applicable document list and process on the official Income Tax Department portal before applying.",
+  "keywords": [
+    "PAN",
+    "PAN card",
+    "Permanent Account Number",
+    "e-PAN",
+    "Instant e-PAN",
+    "Aadhaar",
+    "DigiLocker",
+    "documents",
+    "identity proof",
+    "address proof",
+    "date of birth proof",
+    "Income Tax Department"
+  ],
+  "official_url": "https://www.incometax.gov.in/"
+},
   {
-    "service": "Driving Licence",
-    "category": "Transport",
-    "content": "Driving licence services are provided through the official Parivahan system. Depending on the service, the process may include learner licence application, document submission, fee payment, appointment booking and driving test. Applicants should meet the applicable age and eligibility requirements and track their application through the official system.",
-    "keywords": [
-      "driving licence",
-      "driving license",
-      "DL",
-      "vehicle",
-      "transport",
-      "learner licence",
-      "driving test"
-    ],
-    "official_url": "https://parivahan.gov.in/"
-  },
+  "service": "Driving Licence",
+  "category": "Transport",
+  "content": "Driving licence services are provided through the official Parivahan system. Commonly required documents and information may include proof of identity, proof of address, proof of date of birth, a valid learner licence where applicable, passport-size photographs where required, and applicable medical or fitness documents depending on the applicant's age and type of licence. The process may include learner licence application, document submission, fee payment, appointment booking and driving test. Applicants should meet the applicable age and eligibility requirements and verify the exact document requirements through the official Parivahan portal before applying.",
+  "keywords": [
+    "driving licence",
+    "driving license",
+    "DL",
+    "vehicle",
+    "transport",
+    "learner licence",
+    "driving test",
+    "documents",
+    "identity proof",
+    "address proof",
+    "date of birth proof",
+    "medical certificate"
+  ],
+  "official_url": "https://parivahan.gov.in/"
+},
   {
     "service": "Income Certificate",
     "category": "Certificates",
@@ -90,4 +121,24 @@
     ],
     "official_url": "https://scholarships.gov.in/"
   }
+  ,
+{
+  "service": "Birth Certificate",
+  "category": "Certificates",
+  "content": "Birth registration and birth certificates in India are handled through the official Civil Registration System and the relevant Registrar or local registration authority. The registration process records information such as the child's details, parents' details, address and place of birth. The exact documents and supporting requirements can vary depending on the State, Union Territory, registration authority and whether the birth is being registered normally or through delayed registration. Applicants should provide the required birth and family details and verify the exact document requirements with the concerned Registrar or official Civil Registration System before applying.",
+  "keywords": [
+    "birth certificate",
+    "birth registration",
+    "birth",
+    "certificate",
+    "civil registration",
+    "child",
+    "parents",
+    "place of birth",
+    "documents",
+    "Registrar",
+    "delayed registration"
+  ],
+  "official_url": "https://dc.crsorgi.gov.in/"
+}
 ]
