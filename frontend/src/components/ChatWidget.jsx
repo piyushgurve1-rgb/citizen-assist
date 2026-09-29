@@ -9,6 +9,7 @@ function ChatWidget({
   selectedService,
   initialAction,
 }) {
+  
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
@@ -60,21 +61,36 @@ function ChatWidget({
   // Voice Output
   // -----------------------------
 
-  const speakReply = (text) => {
-    if (!("speechSynthesis" in window)) {
-      return;
-    }
+ const cleanTextForSpeech = (text) => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/#{1,6}\s?/g, "")
+    .replace(/`/g, "")
+    .replace(/^\s*[-•]\s+/gm, "")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/\[(.*?)\]\(.*?\)/g, "$1")
+    .replace(/\n{2,}/g, ". ")
+    .trim();
+};
 
-    window.speechSynthesis.cancel();
+const speakReply = (text) => {
+  if (!("speechSynthesis" in window)) {
+    return;
+  }
 
-    const utterance = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.cancel();
 
-    utterance.lang = selectedLanguage || "en-IN";
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
+  const speechText = cleanTextForSpeech(text);
 
-    window.speechSynthesis.speak(utterance);
-  };
+  const utterance = new SpeechSynthesisUtterance(speechText);
+
+  utterance.lang = selectedLanguage || "en-IN";
+  utterance.rate = 0.95;
+  utterance.pitch = 1;
+
+  window.speechSynthesis.speak(utterance);
+};
 
   // -----------------------------
   // Edit Distance
@@ -1107,36 +1123,29 @@ You can ask about this service's documents, steps or eligibility.`;
     }, 400);
   };
 
-  // -----------------------------
-  // Voice Input
-  // -----------------------------
-
-  const startVoiceInput = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition ||
+  
+// -----------------------------
+// Voice Input
+// -----------------------------
+  function startVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition ||
       window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       alert(
         "Voice input is not supported in this browser. Please use Google Chrome or Microsoft Edge."
       );
-
       return;
     }
 
-    if (
-      isListening &&
-      recognitionRef.current
-    ) {
+    if (isListening && recognitionRef.current) {
       recognitionRef.current.stop();
       return;
     }
 
     const recognition = new SpeechRecognition();
 
-    recognition.lang =
-      selectedLanguage || "en-IN";
-
+    recognition.lang = selectedLanguage || "en-IN";
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -1144,20 +1153,88 @@ You can ask about this service's documents, steps or eligibility.`;
       setIsListening(true);
     };
 
-    recognition.onresult = (event) => {
-      const transcript =
-        event.results[0][0].transcript.trim();
+    recognition.onresult = async (event) => {
+      const transcript = event.results[0][0].transcript.trim();
 
       if (!transcript) {
         return;
       }
 
-      setMessage(transcript);
+      setMessage("");
 
-      // Use the same backend flow as normal text messages
-      setTimeout(() => {
-        setMessage(transcript);
-      }, 0);
+      const detectedService = findService(transcript);
+
+      if (detectedService) {
+        setCurrentChatService(detectedService);
+      }
+
+      const serviceForMessage = selectedService ||
+        detectedService ||
+        currentChatService;
+
+      // Show user's voice message
+      setMessages((current) => [
+        ...current,
+        {
+          sender: "user",
+          text: transcript,
+          time: "Now",
+        },
+      ]);
+
+      try {
+        // Send voice message to backend
+        const response = await fetch(
+          "http://127.0.0.1:8000/chat",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message: transcript,
+              language: selectedLanguage,
+              service: serviceForMessage?.name || null,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Backend returned ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        const reply = data.reply ||
+          "Sorry, I could not understand your request.";
+
+        setMessages((current) => [
+          ...current,
+          {
+            sender: "ai",
+            text: reply,
+            time: "Now",
+          },
+        ]);
+
+        speakReply(reply);
+      } catch (error) {
+        console.error(
+          "Voice chat backend error:",
+          error
+        );
+
+        setMessages((current) => [
+          ...current,
+          {
+            sender: "ai",
+            text: "Sorry, backend se connection nahi ho pa raha hai.",
+            time: "Now",
+          },
+        ]);
+      }
     };
 
     recognition.onerror = (event) => {
@@ -1177,7 +1254,7 @@ You can ask about this service's documents, steps or eligibility.`;
     recognitionRef.current = recognition;
 
     recognition.start();
-  };
+  }
 
   // -----------------------------
   // Language Selection
