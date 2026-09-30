@@ -182,3 +182,283 @@
     border-right-color: var(--border);
   }
 }
+
+/* ============================= */
+/* Premium Navbar Login Button   */
+/* ============================= */
+
+.nav-login-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-width: 92px;
+  height: 42px;
+  padding: 0 16px;
+
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  border-radius: 11px;
+
+  background: rgba(30, 41, 59, 0.75);
+  color: #f8fafc;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.nav-login-button:hover {
+  background: rgba(37, 99, 235, 0.16);
+  border-color: rgba(96, 165, 250, 0.55);
+
+  box-shadow:
+    0 6px 18px rgba(37, 99, 235, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  transform: translateY(-1px);
+}
+
+.nav-login-button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-login-button:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.65);
+  outline-offset: 3px;
+}
+
+.login-button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  font-size: 14px;
+  line-height: 1;
+
+  border-radius: 7px;
+  background: rgba(59, 130, 246, 0.14);
+}
+/* ============================= */
+/* Navbar Theme Toggle Switch    */
+/* ============================= */
+
+.theme-toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 56px;
+  height: 30px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.2s ease;
+}
+
+.theme-toggle:active {
+  transform: scale(0.96);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.65);
+  outline-offset: 3px;
+}
+
+.theme-toggle__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+/* Dark mode: matches the Login button, knob on the right (moon) */
+.theme-toggle--dark {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(96, 165, 250, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.theme-toggle--dark:hover {
+  background: rgba(37, 99, 235, 0.16);
+  border-color: rgba(96, 165, 250, 0.55);
+}
+
+.theme-toggle--dark .theme-toggle__knob {
+  transform: translateX(26px);
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* Light mode: knob on the left (sun) */
+.theme-toggle--light {
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.15);
+}
+
+.theme-toggle--light:hover {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.theme-toggle--light .theme-toggle__knob {
+  transform: translateX(0);
+  background: #ffffff;
+  color: #d97706;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .theme-toggle {
+    width: 50px;
+    height: 28px;
+  }
+
+  .theme-toggle__knob {
+    width: 20px;
+    height: 20px;
+  }
+
+  .theme-toggle--dark .theme-toggle__knob {
+    transform: translateX(22px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle__knob {
+    transition: none;
+  }
+}
+/* ============================= */
+/* Light theme                   */
+/* ============================= */
+
+/* Smooth theme change (200-300ms) */
+body,
+.navbar,
+.nav-link,
+.nav-action,
+.notification-button,
+.profile-button,
+.profile-menu,
+input,
+textarea,
+select {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+[data-theme="light"] body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* Navbar */
+[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  color: #0f172a;
+}
+
+[data-theme="light"] .navbar-brand,
+[data-theme="light"] .nav-link,
+[data-theme="light"] .nav-action {
+  color: #0f172a;
+}
+
+[data-theme="light"] .nav-link.active {
+  color: #2563eb;
+}
+
+/* Login button (same look, readable on light) */
+[data-theme="light"] .nav-login-button {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .nav-login-button:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.5);
+}
+
+[data-theme="light"] .login-button-icon {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+/* Notification + profile */
+[data-theme="light"] .notification-button,
+[data-theme="light"] .profile-button {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .profile-menu {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .profile-menu button {
+  color: #0f172a;
+}
+
+/* Inputs */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #64748b;
+}

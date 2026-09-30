@@ -4,12 +4,10 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from google import genai
 from groq import Groq
-from rag.retriever import retrieve_information
 import sqlite3
 import hashlib
 import secrets
 import os
-import time
 
 
 app = FastAPI()
@@ -217,16 +215,11 @@ def get_local_answer(message, language):
 
 # -------------------- Models --------------------
 
-class ChatMessage(BaseModel):
-    role: str
-    content: str
-
-
 class ChatRequest(BaseModel):
     message: str
     language: str = "en-IN"
     service: str | None = None
-    history: list[ChatMessage] = []
+
 
 class RegisterRequest(BaseModel):
     name: str
@@ -276,59 +269,6 @@ init_db()
 
 # -------------------- AI Response --------------------
 
-# -------------------- RAG Context --------------------
-
-class rag_context:
-    """Retrieve and format verified context for a government-service query."""
-
-    def __init__(self, message, service=None, top_k=2, max_distance=1.25):
-        self.message = message
-        self.service = service
-        self.top_k = top_k
-        self.max_distance = max_distance
-
-    def retrieve(self):
-        """Return formatted context, or an empty string when no safe match exists."""
-        query = self.message
-        if self.service:
-            query = f"{self.service} {self.message}"
-
-        results = retrieve_information(query, top_k=self.top_k)
-        if not results:
-            return ""
-
-        best_result = results[0]
-        result_service = best_result.get("service", "")
-
-        # A caller-provided service must not receive unrelated information.
-        if self.service and result_service.lower() != self.service.lower():
-            return ""
-
-        # Discard weak semantic matches rather than supplying misleading facts.
-        if best_result.get("distance", 999) > self.max_distance:
-            return ""
-
-        return self.format_result(best_result)
-
-    def format_result(self, result):
-        """Render one retriever result in the format consumed by the prompt."""
-        return (
-            f"Service: {result.get('service', '')}\n"
-            f"Category: {result.get('category', '')}\n"
-            f"Information:\n{result.get('document', '')}\n"
-            f"Official URL: {result.get('official_url', '')}"
-        )
-
-
-def get_rag_context(message, service=None):
-
-    try:
-        return rag_context(message, service).retrieve()
-
-    except Exception as e:
-        print("RAG retrieval failed:", type(e).__name__)
-        return ""
-
 def generate_ai_response(prompt, message="", language="en-IN"):
     # 1. Groq - Primary
     try:
@@ -342,11 +282,10 @@ def generate_ai_response(prompt, message="", language="en-IN"):
             ],
             temperature=0.2,
             max_tokens=700,
-            timeout=3
+            timeout=5
         )
 
         answer = response.choices[0].message.content
-
 
         if answer:
             print("AI Provider: Groq")
@@ -565,27 +504,14 @@ def is_step_question(message):
 
 
 
-
+    
 # -------------------- Chat --------------------
 
 @app.post("/chat")
 def chat(request: ChatRequest):
 
-    start_time = time.time()
-    print("1. Chat request received")
-
     message = request.message.strip().lower()
     language = request.language
-    service = request.service
-    # -------------------- Conversation History --------------------
-
-    history_text = ""
-
-    if request.history:
-        history_text = "\n".join(
-            f"{item.role}: {item.content}"
-            for item in request.history[-6:]
-        )
     # Hindi / Marathi voice intent normalization
     message = (
         message
@@ -610,13 +536,6 @@ def chat(request: ChatRequest):
 
     if request.service:
         message = request.service.lower() + " " + message
-            # RAG retrieval
-    rag_context = get_rag_context(
-        request.message,
-        request.service
-    )
-
-    print("RAG Context:", rag_context)
 
     # PAN number format question
     if (
@@ -648,76 +567,31 @@ def chat(request: ChatRequest):
         return {
             "reply": reply
         }
-    # -------------------- Context-Aware RAG Retrieval --------------------
 
-    # -------------------- Context-Aware RAG Retrieval --------------------
+    website_requested = (
+        "official website" in message
+        or "official site" in message
+        or "website" in message
+    )
 
-    rag_query = message
+    if website_requested:
 
-    if history_text:
-        rag_query = f"{history_text}\nCurrent question: {message}"
+        website = get_website(message)
 
-    if service:
-        rag_query = f"{service} {rag_query}"
-
-    rag_results = retrieve_information(rag_query, top_k=3)
-    print(
-    "2. RAG completed:",
-    round(time.time() - start_time, 2),
-    "seconds"
-)
-    if rag_results:
-        best_result = rag_results[0]
-
-        rag_context = f"""
-Service: {best_result["service"]}
-Category: {best_result["category"]}
-Official URL: {best_result["official_url"]}
-
-Information:
-{best_result["document"]}
-"""
-    else:
-        rag_context = ""
-
-        website_requested = (
-            "official website" in message
-            or "official site" in message
-            or "website" in message
-        )
-
-        if website_requested:
-            website = get_website(message)
-
-            if website:
-                return {
-                    "reply": f"Official website: {website}"
-                }
-
+        if website:
             return {
-                "reply": "Please mention the government service whose official website you need."
+                "reply": f"Official website: {website}"
             }
 
-    # -------------------- RAG Direct Document Answer --------------------
-
-
+        return {
+            "reply": "Please mention the government service whose official website you need."
+        }
 
     # General questions → Gemini AI
-    history_text = "\n".join(
-        f"{item.role}: {item.content}"
-        for item in request.history
-        if item.content.strip()
-    ) or "No previous conversation."
-
     prompt = f"""
 You are CitizenAssist, a government-service assistant for Indian citizens.
 
 User language: {language}
-RAG is the primary source of factual information.
-Use the RAG context when it contains relevant information for the user's question.
-Do not change, corrupt, or re-encode Unicode characters.
-Return the answer as normal UTF-8 text.
-Preserve characters such as ₹ and Indian-language text correctly.
 
 Answer ONLY the user's actual question.
 
@@ -728,9 +602,6 @@ Rules:
 - Use simple language.
 - If steps are needed, give numbered steps.
 - If documents are asked, give only the relevant documents.
-- For document questions, use only the documents or information explicitly listed in the RAG context.
-- Do not add sub-details, examples, mandatory/required claims, or document fields that are not explicitly present in the RAG context.
-- Do not turn "commonly required" information into "mandatory" requirements.
 - Do not invent fees, deadlines, eligibility rules, or official links.
 - Never guess eligibility criteria, income limits, benefit amounts,
   document requirements, or deadlines.
@@ -756,38 +627,16 @@ Rules:
   benefit amounts, or other numerical criteria from memory.
 - If verified information is insufficient, say that the exact current eligibility
   should be checked on the official government portal.
-  - RAG context is your only source of factual information about the requested government service.
-- Use only information explicitly present in the RAG context.
-- Do not add, expand, infer, or invent documents, requirements, fees, eligibility criteria, deadlines, or steps.
-- If the RAG context does not contain the requested information, clearly say that the available information is insufficient and direct the user to the official URL provided in the RAG context.
-- Do not add details such as IFSC code, OTP, possession proof, passport-size photo, income limits, land limits, etc. unless they are explicitly present in the RAG context.
-  RAG context:
-Conversation history:
-{history_text}
-
-RAG context:
-{rag_context}
-
-Current user question:
+User question:
 {message}
 """
 
     reply = generate_ai_response(
-        prompt,
-        message=message,
-        language=language,
-    )
-    print(
-        "3. AI response completed:",
-        round(time.time() - start_time, 2),
-        "seconds",
-    )
-
-    print(
-    "4. Total time:",
-    round(time.time() - start_time, 2),
-    "seconds"
+    prompt,
+    message=message,
+    language=language
 )
+
     return {
         "reply": reply
     }

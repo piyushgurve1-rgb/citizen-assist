@@ -8,6 +8,7 @@ import ServiceDetails from "./pages/ServiceDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ChatWidget from "./components/ChatWidget";
+import "./App.css";
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);

@@ -12,6 +12,7 @@ function ChatWidget({
 
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [showLanguages, setShowLanguages] = useState(false);
   const [currentChatService, setCurrentChatService] = useState(null);
   const [chatServiceOverride, setChatServiceOverride] = useState(null);
@@ -75,6 +76,12 @@ const cleanTextForSpeech = (text) => {
 };
 
 const speakReply = (text) => {
+  console.log("VOICE:", isVoiceEnabled);
+
+  if (!isVoiceEnabled) {
+    return;
+  }
+
   if (!("speechSynthesis" in window)) {
     return;
   }
@@ -85,6 +92,7 @@ const speakReply = (text) => {
     return;
   }
 
+  // Previous speech ko stop karo
   window.speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -92,9 +100,13 @@ const speakReply = (text) => {
   const voices = window.speechSynthesis.getVoices();
 
   const matchingVoice = voices.find((voice) =>
-    voice.lang.toLowerCase().startsWith(
-      (selectedLanguage || "en-IN").split("-")[0].toLowerCase()
-    )
+    voice.lang
+      .toLowerCase()
+      .startsWith(
+        (selectedLanguage || "en-IN")
+          .split("-")[0]
+          .toLowerCase()
+      )
   );
 
   if (matchingVoice) {
@@ -104,10 +116,6 @@ const speakReply = (text) => {
   utterance.lang = selectedLanguage || "en-IN";
   utterance.rate = 0.95;
   utterance.pitch = 1;
-
-  utterance.onend = () => {
-    window.speechSynthesis.cancel();
-  };
 
   utterance.onerror = (event) => {
     console.error("Speech synthesis error:", event.error);
@@ -1504,6 +1512,29 @@ const serviceForMessage =
               </div>
 
             </div>
+            <button
+              type="button"
+              className="voice-toggle-button"
+              onClick={() => {
+                setIsVoiceEnabled((current) => {
+                  const nextState = !current;
+
+                  if ("speechSynthesis" in window) {
+                    if (nextState) {
+                      window.speechSynthesis.resume();
+                    } else {
+                      window.speechSynthesis.pause();
+                    }
+                  }
+
+                  return nextState;
+                });
+              }}
+              title={isVoiceEnabled ? "Turn voice off" : "Turn voice on"}
+              aria-label={isVoiceEnabled ? "Turn voice off" : "Turn voice on"}
+            >
+              {isVoiceEnabled ? "🔊" : "🔇"}
+            </button>
 
             <button
               type="button"
